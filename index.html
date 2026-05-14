@@ -1,0 +1,3798 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>منصة قياس الجاهزية القيادية والكفاءات المستقبلية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0B2545;
+  --navy-2:#13315C;
+  --gold:#C9A227;
+  --gold-soft:#E6C76A;
+  --bg:#F4F6FB;
+  --card:#FFFFFF;
+  --ink:#0F172A;
+  --muted:#5B6B85;
+  --line:#E2E8F0;
+  --good:#16A34A;
+  --warn:#D97706;
+  --bad:#B91C1C;
+  --info:#1D4ED8;
+  --shadow:0 10px 30px rgba(11,37,69,.08), 0 2px 6px rgba(11,37,69,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:'Tajawal','Cairo',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+.app{min-height:100vh;display:flex;flex-direction:column}
+
+/* HEADER */
+.topbar{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-2) 100%);
+  color:#fff;padding:14px 28px;display:flex;align-items:center;gap:16px;
+  border-bottom:3px solid var(--gold);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.crest{
+  width:42px;height:42px;border-radius:8px;
+  background:radial-gradient(circle at 30% 30%,var(--gold-soft),var(--gold));
+  display:grid;place-items:center;color:var(--navy);font-weight:800;font-size:20px;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);
+}
+.brand h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+.brand small{display:block;color:#cdd7e6;font-size:12px;margin-top:2px}
+.spacer{flex:1}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:6px 12px;border-radius:999px;font-size:13px}
+
+/* SCREENS */
+.screen{display:none;padding:28px;max-width:1240px;margin:0 auto;width:100%}
+.screen.active{display:block;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* LOGIN */
+.login-wrap{
+  min-height:calc(100vh - 70px);display:grid;place-items:center;padding:24px;
+  background:
+    radial-gradient(1200px 600px at 90% -10%,rgba(201,162,39,.10),transparent 60%),
+    radial-gradient(900px 500px at -10% 110%,rgba(11,37,69,.08),transparent 60%),
+    var(--bg);
+}
+.login-card{
+  width:100%;max-width:920px;background:var(--card);border-radius:18px;
+  box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-columns:1.1fr 1fr;
+  border:1px solid var(--line);
+}
+.login-side{
+  background:linear-gradient(160deg,var(--navy),var(--navy-2));color:#fff;padding:38px;
+  position:relative;overflow:hidden;
+}
+.login-side::after{
+  content:"";position:absolute;inset:auto -40px -60px auto;width:300px;height:300px;
+  background:radial-gradient(circle,var(--gold) 0%,transparent 65%);opacity:.18;
+}
+.login-side h2{font-size:24px;margin:0 0 8px;font-weight:800}
+.login-side p{color:#cdd7e6;line-height:1.9;font-size:14px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.badge-pill{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);padding:6px 12px;border-radius:999px;font-size:12px}
+.login-form{padding:38px}
+.login-form h3{margin:0 0 4px;font-size:20px}
+.login-form .sub{color:var(--muted);margin-bottom:22px;font-size:13px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;
+  font-family:inherit;font-size:14px;background:#fff;transition:.15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(11,37,69,.12)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;justify-content:center;
+  padding:12px 18px;border:none;border-radius:10px;font-family:inherit;font-weight:700;cursor:pointer;
+  transition:.15s;font-size:14px;
+}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:var(--navy-2)}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold-soft)}
+.btn-ghost{background:transparent;color:var(--navy);border:1px solid var(--line)}
+.btn-ghost:hover{background:#F1F5F9}
+.btn-block{width:100%}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7}
+
+/* GENERIC CARD */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 6px;font-size:18px}
+.card .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+
+/* INFO GRID */
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.kpi .lbl{font-size:12px;color:var(--muted)}
+.kpi .val{font-size:24px;font-weight:800;color:var(--navy);margin-top:4px}
+.kpi .delta{font-size:12px;margin-top:6px;color:var(--good)}
+.kpi::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--gold)}
+
+/* CONSENT */
+.consent-box{background:#FAFBFE;border:1px solid var(--line);border-radius:12px;padding:18px;line-height:2;font-size:14px;color:#1f2937}
+.consent-list{margin:8px 0 0;padding:0 18px 0 0}
+.consent-list li{margin-bottom:6px}
+
+/* PROGRESS */
+.progress-wrap{display:flex;align-items:center;gap:14px;margin:6px 0 18px}
+.progress{flex:1;height:10px;background:#E5EAF3;border-radius:999px;overflow:hidden;position:relative}
+.progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));border-radius:999px;transition:width .4s}
+.progress-meta{font-size:12px;color:var(--muted);min-width:90px;text-align:left}
+
+/* QUESTION CARD */
+.q-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow)}
+.q-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:11px;padding:4px 10px;border-radius:999px;background:#EEF2FF;color:#3730A3;font-weight:600}
+.tag.lvl1{background:#ECFDF5;color:#065F46}
+.tag.lvl2{background:#FEF3C7;color:#92400E}
+.tag.lvl3{background:#FEE2E2;color:#991B1B}
+.q-stem{font-size:17px;line-height:1.9;color:var(--ink);margin:8px 0 18px;font-weight:600}
+.q-context{font-size:14px;line-height:1.9;color:#374151;background:#F8FAFC;border-right:3px solid var(--navy);padding:12px 14px;border-radius:8px;margin-bottom:16px}
+.options{display:grid;gap:10px}
+.opt{
+  display:flex;gap:12px;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;
+  cursor:pointer;background:#fff;transition:.15s;align-items:flex-start;
+}
+.opt:hover{border-color:var(--navy);background:#F8FAFC}
+.opt.selected{border-color:var(--gold);background:#FFFBEB;box-shadow:0 0 0 3px rgba(201,162,39,.18)}
+.opt .dot{
+  width:22px;height:22px;border-radius:50%;border:2px solid #94A3B8;flex:0 0 22px;margin-top:1px;
+  display:grid;place-items:center;font-weight:800;color:transparent;transition:.15s;
+}
+.opt.selected .dot{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.opt .txt{flex:1;font-size:14.5px;line-height:1.85}
+
+/* RANKING (drag) */
+.rank-list{display:grid;gap:8px}
+.rank-actions{display:flex;flex-direction:column;gap:4px;margin-inline-start:auto}
+.rank-btn{
+  width:36px;height:30px;border-radius:8px;border:1px solid #d9e1ee;
+  background:#fff;color:#0B2545;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s ease;
+  touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
+}
+.rank-btn:hover:not(:disabled){background:#F3F6FB;border-color:#C9A227}
+.rank-btn:active:not(:disabled){transform:scale(.95);background:#EEF2F7}
+.rank-btn:disabled{opacity:.35;cursor:not-allowed}
+@media (max-width:600px){
+  .rank-btn{width:40px;height:34px;font-size:16px}
+  .rank-item{padding:12px 10px}
+}
+.rank-item{
+  background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;
+  display:flex;align-items:center;gap:12px;cursor:grab;font-size:14px;user-select:none;
+}
+.rank-item.dragging{opacity:.4}
+.rank-item .num{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:0 0 26px}
+
+/* BEST/WORST */
+.bw-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bw-box{border:1.5px solid var(--line);border-radius:12px;padding:14px}
+.bw-box h5{margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:700}
+.bw-opt{padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;font-size:13.5px;margin-bottom:8px;background:#fff}
+.bw-opt:hover{border-color:var(--navy)}
+.bw-opt.best{border-color:var(--good);background:#ECFDF5}
+.bw-opt.worst{border-color:var(--bad);background:#FEE2E2}
+
+/* NAV */
+.nav-row{display:flex;justify-content:space-between;margin-top:18px;gap:10px}
+
+/* BADGES / motivational */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(40px);
+  background:var(--navy);color:#fff;padding:12px 20px;border-radius:999px;font-size:13px;
+  box-shadow:var(--shadow);opacity:0;transition:.3s;z-index:99;display:flex;align-items:center;gap:10px;
+  border:1px solid rgba(255,255,255,.1);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .ico{width:22px;height:22px;border-radius:50%;background:var(--gold);display:grid;place-items:center;color:var(--navy);font-weight:800}
+
+/* RESULT */
+.result-hero{
+  background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;border-radius:18px;
+  padding:28px;display:grid;grid-template-columns:1.4fr 1fr;gap:20px;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+}
+.result-hero::after{
+  content:"";position:absolute;inset:auto -80px -120px auto;width:380px;height:380px;
+  background:radial-gradient(circle,var(--gold) 0%,transparent 60%);opacity:.18;
+}
+.result-hero h2{margin:0 0 6px;font-size:22px}
+.result-hero .lvl-pill{display:inline-block;background:var(--gold);color:var(--navy);padding:6px 14px;border-radius:999px;font-weight:800;font-size:13px;margin-top:10px}
+.score-ring{
+  width:170px;height:170px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--gold) calc(var(--p)*1%), rgba(255,255,255,.15) 0);
+  margin:0 auto;
+}
+.score-ring > div{
+  width:142px;height:142px;border-radius:50%;background:var(--navy-2);display:grid;place-items:center;text-align:center;
+}
+.score-ring .num{font-size:38px;font-weight:800;color:#fff;line-height:1}
+.score-ring .lbl{font-size:12px;color:#cdd7e6;margin-top:4px}
+
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+.metric{
+  background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;
+}
+.metric .name{font-size:12px;color:var(--muted)}
+.metric .v{font-size:22px;font-weight:800;color:var(--navy);margin:6px 0}
+.metric .bar{height:6px;background:#E5EAF3;border-radius:999px;overflow:hidden}
+.metric .bar > span{display:block;height:100%;background:var(--gold)}
+
+.competency-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
+.cmp-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.cmp-row:last-child{border-bottom:none}
+.cmp-row .name{flex:1;font-size:14px;font-weight:600}
+.cmp-row .bar{flex:2;height:10px;background:#E5EAF3;border-radius:999px;overflow:hidden}
+.cmp-row .bar > span{display:block;height:100%;border-radius:999px}
+.cmp-row .score{width:62px;text-align:left;font-weight:700;color:var(--navy)}
+
+.dev-list{margin:0;padding:0 18px 0 0}
+.dev-list li{margin:8px 0;line-height:1.9;font-size:14px}
+
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.plan{background:#FAFBFE;border:1px solid var(--line);border-radius:12px;padding:16px}
+.plan h5{margin:0 0 8px;color:var(--navy);font-size:14px}
+.plan ul{margin:0;padding:0 18px 0 0;font-size:13px;line-height:1.9;color:#374151}
+
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.dash-grid .col-3{grid-column:span 3}
+.dash-grid .col-4{grid-column:span 4}
+.dash-grid .col-6{grid-column:span 6}
+.dash-grid .col-8{grid-column:span 8}
+.dash-grid .col-12{grid-column:span 12}
+.heatmap{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.heat-cell{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;font-size:12px}
+.heat-cell .v{font-weight:800;font-size:18px;margin-top:6px}
+
+table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+table.tbl th,table.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right}
+table.tbl th{background:#F8FAFC;color:var(--muted);font-weight:600;font-size:12px}
+table.tbl tr:hover td{background:#FAFBFE}
+.tag-lvl{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.lvl-HLP{background:#DCFCE7;color:#14532D}
+.lvl-EP{background:#DBEAFE;color:#1E3A8A}
+.lvl-FP{background:#FEF3C7;color:#78350F}
+.lvl-DR{background:#FEE2E2;color:#7F1D1D}
+.lvl-RM{background:#F1F5F9;color:#334155}
+
+/* USERS TABLE */
+table.data-table{width:100%;border-collapse:collapse;font-size:13.5px}
+table.data-table th,table.data-table td{padding:10px 12px;text-align:start;border-bottom:1px solid var(--line)}
+table.data-table thead th{background:#F3F6FB;color:#0B2545;font-weight:700;font-size:12.5px}
+table.data-table tbody tr:hover td{background:#FAFBFE}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tab{padding:10px 16px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent}
+.tab.active{color:var(--navy);border-bottom-color:var(--gold)}
+
+/* MISC */
+.section-title{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
+.section-title h2{font-size:20px;margin:0}
+.section-title .dash{flex:1;height:1px;background:var(--line)}
+.muted{color:var(--muted)}
+.right{text-align:left}
+.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* CONFIDENCE */
+.confidence-section{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.conf-label{font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600;display:flex;align-items:center;gap:8px}
+.conf-label .pulse{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(201,162,39,.6);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(201,162,39,.5)}70%{box-shadow:0 0 0 8px rgba(201,162,39,0)}100%{box-shadow:0 0 0 0 rgba(201,162,39,0)}}
+.confidence-bar{display:flex;gap:8px;flex-wrap:wrap}
+.conf-btn{
+  flex:1;min-width:130px;padding:12px 14px;border:1.5px solid var(--line);background:#fff;
+  border-radius:10px;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;
+  color:#374151;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.conf-btn:hover{border-color:var(--navy)}
+.conf-btn.active{border-color:var(--gold);background:#FFFBEB;color:var(--navy);box-shadow:0 0 0 3px rgba(201,162,39,.18)}
+.conf-btn .ico{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800}
+.conf-btn[data-c="very_confident"] .ico{background:#DCFCE7;color:#14532D}
+.conf-btn[data-c="confident"] .ico{background:#DBEAFE;color:#1E3A8A}
+.conf-btn[data-c="unsure"] .ico{background:#FEF3C7;color:#78350F}
+
+/* MASTERY */
+.mastery-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;margin-right:8px}
+.mst-Beginner{background:#FEE2E2;color:#7F1D1D}
+.mst-Developing{background:#FEF3C7;color:#78350F}
+.mst-Proficient{background:#DBEAFE;color:#1E3A8A}
+.mst-Advanced{background:#DCFCE7;color:#14532D}
+
+.learner-matrix{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.matrix-cell{border-radius:12px;padding:16px;border:1.5px solid var(--line);position:relative;overflow:hidden}
+.matrix-cell::before{content:"";position:absolute;inset:0 auto 0 0;width:4px}
+.matrix-cell.mastered{background:#F0FDF4;border-color:#86EFAC}
+.matrix-cell.mastered::before{background:#16A34A}
+.matrix-cell.unconscious{background:#EFF6FF;border-color:#93C5FD}
+.matrix-cell.unconscious::before{background:#3B82F6}
+.matrix-cell.misinformed{background:#FEF2F2;border-color:#FCA5A5}
+.matrix-cell.misinformed::before{background:#DC2626}
+.matrix-cell.doubt{background:#FFFBEB;border-color:#FCD34D}
+.matrix-cell.doubt::before{background:#F59E0B}
+.matrix-cell h5{margin:0 0 4px;font-size:13px;display:flex;align-items:center;justify-content:space-between}
+.matrix-cell .v{font-size:26px;font-weight:800;color:var(--navy)}
+.matrix-cell .desc{font-size:12px;color:#475569;margin-top:6px;line-height:1.7}
+.matrix-cell .ratio{font-size:11px;color:var(--muted);margin-top:2px}
+
+.knowledge-bar{display:flex;height:12px;border-radius:999px;overflow:hidden;background:#E5EAF3;margin-top:6px}
+.knowledge-bar > span{display:block;height:100%;transition:width .4s}
+.knowledge-bar .seg-mastered{background:#16A34A}
+.knowledge-bar .seg-unconscious{background:#3B82F6}
+.knowledge-bar .seg-misinformed{background:#DC2626}
+.knowledge-bar .seg-doubt{background:#F59E0B}
+.knowledge-legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.knowledge-legend span{display:inline-flex;align-items:center;gap:5px}
+.knowledge-legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+.pattern-card{background:#FAFBFE;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:10px;display:flex;gap:12px;align-items:flex-start}
+.pattern-card .badge{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;flex-shrink:0}
+.bdg-warn{background:#FEE2E2;color:#7F1D1D}
+.bdg-info{background:#DBEAFE;color:#1E3A8A}
+.bdg-good{background:#DCFCE7;color:#14532D}
+.bdg-amber{background:#FEF3C7;color:#78350F}
+
+.calibration-meter{display:flex;align-items:center;gap:14px;background:#F8FAFC;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
+.calibration-meter .gauge{flex:1;height:10px;background:#E5EAF3;border-radius:999px;position:relative;overflow:hidden}
+.calibration-meter .gauge > span{position:absolute;height:100%;background:linear-gradient(90deg,#DC2626 0%,#F59E0B 50%,#16A34A 100%);border-radius:999px}
+.calibration-meter .marker{position:absolute;top:-3px;width:3px;height:16px;background:var(--navy);border-radius:2px}
+
+/* STAGE STEPPER */
+.stage-stepper{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 18px;
+  background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);
+}
+.step{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  border:1.5px solid var(--line);background:#FAFBFE;transition:.25s;
+  position:relative;
+}
+.step .step-num{
+  width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;
+  background:#E2E8F0;color:#64748B;flex-shrink:0;font-size:14px;
+}
+.step .step-info{display:flex;flex-direction:column}
+.step .step-name{font-size:13.5px;font-weight:700;color:#475569}
+.step .step-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.step.done{background:#F0FDF4;border-color:#86EFAC}
+.step.done .step-num{background:#16A34A;color:#fff}
+.step.done .step-name{color:#065F46}
+.step.active{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.15)}
+.step.active .step-num{background:var(--gold);color:var(--navy)}
+.step.active .step-name{color:var(--navy)}
+
+/* BADGES */
+.badges-bar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.badge-earned{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+  background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1px solid #F59E0B;
+  font-size:12px;font-weight:700;color:#78350F;
+  animation:badgePop .5s ease;
+}
+@keyframes badgePop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.badge-earned .icon{
+  width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);
+  display:grid;place-items:center;font-size:10px;font-weight:800;
+}
+.badge-locked{
+  background:#F1F5F9;border:1px solid var(--line);color:#94A3B8;
+}
+.badge-locked .icon{background:#CBD5E1;color:#fff}
+
+.badge-unlock-toast{
+  position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-30px);
+  background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1.5px solid var(--gold);
+  padding:14px 22px;border-radius:14px;box-shadow:0 12px 30px rgba(201,162,39,.25);
+  display:flex;gap:14px;align-items:center;z-index:100;opacity:0;transition:.4s;
+  min-width:280px;
+}
+.badge-unlock-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.badge-unlock-toast .big-icon{
+  width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--navy);
+  display:grid;place-items:center;font-size:20px;font-weight:800;
+}
+.badge-unlock-toast .text strong{display:block;font-size:14px;color:var(--navy);margin-bottom:2px}
+.badge-unlock-toast .text small{color:#78350F;font-size:12px}
+
+/* CHALLENGE BANNER */
+.challenge-banner{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;
+  background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1.5px solid var(--gold);
+  margin-bottom:14px;animation:slideDown .4s ease;font-size:13.5px;font-weight:600;color:#78350F;
+}
+@keyframes slideDown{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
+.challenge-banner .ico{font-size:20px}
+.challenge-banner.info{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-color:#3B82F6;color:#1E3A8A}
+.challenge-banner.diagnostic{background:linear-gradient(135deg,#FEF2F2,#FEE2E2);border-color:#DC2626;color:#7F1D1D}
+
+/* PERFORMANCE TIER */
+.tier-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+  font-size:12px;font-weight:700;letter-spacing:.2px;
+}
+.tier-good{background:#DBEAFE;color:#1E3A8A}
+.tier-advanced{background:#FEF3C7;color:#78350F}
+.tier-leadership{background:linear-gradient(135deg,#DCFCE7,#86EFAC);color:#14532D}
+
+/* TIMER */
+.timer-bar{
+  display:flex;align-items:center;gap:10px;background:#FEF2F2;border:1px solid #FCA5A5;
+  border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:#7F1D1D;font-weight:600;
+}
+.timer-bar .countdown{
+  font-family:'Courier New',monospace;font-size:16px;font-weight:800;
+  background:#fff;padding:3px 10px;border-radius:6px;border:1px solid #FCA5A5;
+  min-width:54px;text-align:center;
+}
+.timer-bar.urgent{background:#FEE2E2;border-color:#DC2626;animation:flashUrgent 1s infinite}
+@keyframes flashUrgent{0%,100%{background:#FEE2E2}50%{background:#FECACA}}
+
+/* SMART FEEDBACK */
+.smart-fb{
+  background:#F0F9FF;border-right:3px solid #0284C7;border-radius:8px;padding:8px 12px;
+  font-size:12.5px;color:#0C4A6E;margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.smart-fb .ico{color:#0284C7;font-size:14px}
+
+/* STAGE SUMMARY (result) */
+.stage-summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;
+}
+.stage-card{
+  background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:16px;position:relative;overflow:hidden;
+}
+.stage-card.reached{border-color:var(--gold);background:#FFFBEB}
+.stage-card .stg-ico{
+  width:36px;height:36px;border-radius:8px;background:var(--navy);color:#fff;
+  display:grid;place-items:center;font-weight:800;margin-bottom:8px;
+}
+.stage-card.reached .stg-ico{background:var(--gold);color:var(--navy)}
+.stage-card h5{margin:0 0 4px;font-size:13.5px;color:var(--navy)}
+.stage-card .pass-rate{font-size:22px;font-weight:800;color:var(--navy);margin-top:4px}
+.stage-card .seen{font-size:11px;color:var(--muted);margin-top:2px}
+
+.difficulty-log{margin-top:10px}
+.diff-event{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FFFBEB;
+  border:1px solid #FCD34D;border-radius:10px;margin-bottom:6px;font-size:13px;
+}
+.diff-event .arrow{color:var(--gold);font-weight:800;font-size:16px}
+.diff-event .from-to{font-family:'Courier New',monospace;font-weight:700;color:var(--navy)}
+
+@media (max-width: 980px){
+  .stage-stepper{grid-template-columns:repeat(2,1fr)}
+  .stage-summary{grid-template-columns:repeat(2,1fr)}
+  .login-card{grid-template-columns:1fr}
+  .info-grid,.result-grid,.dash-grid .col-3,.dash-grid .col-4,.dash-grid .col-6,.dash-grid .col-8{grid-template-columns:1fr;grid-column:span 12}
+  .info-grid{grid-template-columns:repeat(2,1fr)}
+  .result-hero{grid-template-columns:1fr}
+  .result-grid{grid-template-columns:repeat(2,1fr)}
+  .heatmap{grid-template-columns:repeat(4,1fr)}
+  .plan-grid,.bw-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOP BAR -->
+<header class="topbar" id="topbar" style="display:none">
+  <div class="brand">
+    <div class="crest">ق</div>
+    <div>
+      <h1>منصة قياس الجاهزية القيادية والكفاءات المستقبلية</h1>
+      <small>تقييم احترافي للإمكانات القيادية والكفاءات المؤسسية</small>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="user-chip" id="userChip">—</div>
+  <button class="btn btn-ghost" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.18)" onclick="logout()">تسجيل الخروج</button>
+</header>
+
+<!-- ===== LOGIN ===== -->
+<section id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-side">
+        <div class="brand" style="margin-bottom:14px">
+          <div class="crest">ق</div>
+          <div>
+            <h1 style="color:#fff">منصة الجاهزية القيادية</h1>
+            <small style="color:#cdd7e6">Leadership Readiness & Future Talent Assessment</small>
+          </div>
+        </div>
+        <h2>تقييم احترافي للقيادات المستقبلية</h2>
+        <p>منصة مؤسسية لقياس الإمكانات القيادية Potential وليس فقط المعرفة الحالية، عبر اختبار تكيفي يكشف جودة التفكير والسلوك المهني في مواقف تشغيلية واقعية.</p>
+        <div class="badges">
+          <span class="badge-pill">٨ كفاءات قيادية</span>
+          <span class="badge-pill">اختبار تكيفي</span>
+          <span class="badge-pill">٣٠ دقيقة</span>
+          <span class="badge-pill">تقرير فوري</span>
+          <span class="badge-pill">سرية تامة</span>
+        </div>
+        <div style="margin-top:26px;font-size:12px;color:#9fb1cd;line-height:2">
+          مرخّص للاستخدام الداخلي. تُعالج النتائج بسرية وفق سياسات الموارد البشرية،
+          ويُستخدم التقييم لأغراض التطوير والتخطيط الوظيفي.
+        </div>
+      </div>
+      <div class="login-form">
+        <h3>تسجيل الدخول</h3>
+        <div class="sub">أدخل بيانات الدخول المؤسسية للبدء</div>
+        <div class="field">
+          <label>اسم المستخدم</label>
+          <input id="loginUser" placeholder="مثال: a.alharbi"/>
+        </div>
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input id="loginPass" type="password" placeholder="••••••••"/>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>الإدارة</label>
+            <select id="loginDept">
+              <option>التشغيل</option>
+              <option>التقنية</option>
+              <option>خدمة المستفيد</option>
+              <option>تحليل البيانات</option>
+              <option>الموارد البشرية</option>
+              <option>المالية</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>المستوى الوظيفي</label>
+            <select id="loginRole">
+              <option value="staff">موظف تشغيل</option>
+              <option value="supervisor">مشرف</option>
+              <option value="manager">إداري</option>
+              <option value="admin">مسؤول النظام (Dashboard)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="doLogin()">دخول إلى التقييم</button>
+        <div id="loginError" style="display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.35);color:#ffb3b8;font-size:13px;text-align:center"></div>
+        <div class="hint" style="line-height:2">
+          الدخول متاح فقط للحسابات المسجّلة لدى الإدارة.<br/>
+          <span style="color:#9fb1cd">للمساعدة في الوصول، يُرجى التواصل مع مسؤول النظام.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INTRO ===== -->
+<section id="screen-intro" class="screen">
+  <div class="section-title"><h2>عن التقييم</h2><div class="dash"></div></div>
+  <div class="card">
+    <h3>ما الذي ستخوضه خلال الـ ٣٠ دقيقة القادمة؟</h3>
+    <div class="sub">تقييم تكيفي يبدأ بأسئلة تمهيدية قصيرة، ثم يتدرّج في الصعوبة بناءً على إجاباتك.</div>
+    <div class="info-grid">
+      <div class="kpi"><div class="lbl">عدد المحاور</div><div class="val">٨</div><div class="delta">كفاءات قيادية أساسية</div></div>
+      <div class="kpi"><div class="lbl">نوع الأسئلة</div><div class="val">٧</div><div class="delta">مواقف، ترتيب، تحليل، ذكاء موقفي</div></div>
+      <div class="kpi"><div class="lbl">المدة</div><div class="val">٣٠ د</div><div class="delta">حد أقصى</div></div>
+      <div class="kpi"><div class="lbl">المخرج</div><div class="val">تقرير فوري</div><div class="delta">يُمكن تصديره PDF</div></div>
+    </div>
+    <div style="margin-top:18px;line-height:2;font-size:14px;color:#374151">
+      التقييم ليس اختبارًا مدرسيًا. لا توجد إجابة «واضحة الصواب أو الخطأ». جميع الخيارات مهنية وواقعية،
+      والفروقات بينها في جودة الحكم المهني، وفهم السياق، وتقدير أثر القرار على المستفيد، وإدارة المخاطر،
+      والقدرة القيادية. إجاباتك ستحدد المسار التكيفي للأسئلة التالية.
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="show('screen-login')">رجوع</button>
+      <button class="btn btn-primary" onclick="show('screen-consent')">متابعة</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONSENT ===== -->
+<section id="screen-consent" class="screen">
+  <div class="section-title"><h2>الإقرار بالسرية والعدالة</h2><div class="dash"></div></div>
+  <div class="card">
+    <div class="consent-box">
+      <strong>إقرار المشارك:</strong>
+      <ul class="consent-list">
+        <li>أوافق على خوض هذا التقييم بأمانة، دون الاستعانة بأي طرف ثالث.</li>
+        <li>أُقرّ بأن إجاباتي ستُستخدم لأغراض التطوير والتخطيط الوظيفي وفق سياسات المؤسسة.</li>
+        <li>تلتزم المنصة بسرية البيانات؛ ولا يُفصح عن النتائج الفردية إلا للجهات المخوّلة.</li>
+        <li>أتفهّم أن النتيجة قد تؤثر على المسار الوظيفي، ولذا فالتقييم مبنيّ على معايير موضوعية ومتدرجة.</li>
+        <li>لن تظهر لي الإجابات الصحيحة لضمان عدالة تكرار التقييم لاحقًا.</li>
+      </ul>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label><input type="checkbox" id="agree"/> أوافق على ما ورد أعلاه</label>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="show('screen-intro')">رجوع</button>
+      <button class="btn btn-primary" onclick="startPreliminary()">بدء الأسئلة التمهيدية</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRELIMINARY ===== -->
+<section id="screen-pre" class="screen">
+  <div class="section-title"><h2>أسئلة تمهيدية</h2><div class="dash"></div><span class="muted" id="preCounter">٠ / ٩</span></div>
+  <div class="progress-wrap">
+    <div class="progress"><span id="preBar" style="width:0%"></span></div>
+    <div class="progress-meta" id="preMeta">٠٪</div>
+  </div>
+  <div id="preCard"></div>
+</section>
+
+<!-- ===== ASSESSMENT ===== -->
+<section id="screen-test" class="screen">
+  <div class="section-title">
+    <h2 id="testTitle">الاختبار التكيفي</h2>
+    <div class="dash"></div>
+    <span class="tier-pill tier-good" id="tierPill">مستوى الأداء: جيد</span>
+    <span class="muted" id="qCounter">٠ / ٢٥</span>
+  </div>
+  <div class="stage-stepper" id="stageStepper">
+    <div class="step done" data-stage="onboarding"><div class="step-num">١</div><div class="step-info"><div class="step-name">التهيئة</div><div class="step-meta">مكتملة</div></div></div>
+    <div class="step active" data-stage="core"><div class="step-num">٢</div><div class="step-info"><div class="step-name">التقييم الأساسي</div><div class="step-meta" id="coreMeta">قيد التنفيذ</div></div></div>
+    <div class="step" data-stage="challenge"><div class="step-num">٣</div><div class="step-info"><div class="step-name">التحدي</div><div class="step-meta" id="chalMeta">—</div></div></div>
+    <div class="step" data-stage="validation"><div class="step-num">٤</div><div class="step-info"><div class="step-name">التحقق النهائي</div><div class="step-meta" id="valMeta">—</div></div></div>
+  </div>
+  <div class="badges-bar" id="badgesBar"></div>
+  <div class="progress-wrap">
+    <div class="progress"><span id="qBar" style="width:0%"></span></div>
+    <div class="progress-meta" id="qMeta">٠٪</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;color:var(--muted)">
+    <span class="tag" id="competencyTag">—</span>
+    <span class="tag lvl1" id="levelTag">مستوى أساسي</span>
+    <span class="tag" id="stageTag" style="background:#FFFBEB;color:#78350F">المرحلة: التقييم الأساسي</span>
+  </div>
+  <div id="qHost"></div>
+</section>
+
+<!-- ===== RESULT ===== -->
+<section id="screen-result" class="screen">
+  <div class="section-title"><h2>تقريرك الفردي</h2><div class="dash"></div>
+    <button class="btn btn-ghost" onclick="exportPDF()">تصدير PDF</button>
+    <button class="btn btn-ghost" onclick="exportMyExcel()">تصدير Excel</button>
+  </div>
+  <div id="resultHost"></div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="show('screen-intro')">إعادة الاختبار</button>
+    <button class="btn btn-primary" onclick="show('screen-dashboard')">عرض لوحة الإدارة</button>
+  </div>
+</section>
+
+<!-- ===== DASHBOARD ===== -->
+<section id="screen-dashboard" class="screen">
+  <div class="section-title">
+    <h2>لوحة تحكم الإدارة</h2><div class="dash"></div>
+    <button class="btn btn-primary" onclick="pullRecordsFromCloud()" title="جلب آخر النتائج من Google Sheets">☁️ تحديث من السحابة</button>
+    <button class="btn btn-ghost" onclick="openUserManagement()">إدارة المستخدمين</button>
+    <button class="btn btn-ghost" onclick="exportDashboardExcel()">تصدير النتائج Excel</button>
+    <button class="btn btn-ghost" onclick="seedSampleData()">توليد بيانات تجريبية</button>
+  </div>
+  <div id="dashHost"></div>
+</section>
+
+<!-- ===== USER MANAGEMENT ===== -->
+<section id="screen-users" class="screen">
+  <div class="section-title">
+    <h2>إدارة المستخدمين</h2><div class="dash"></div>
+    <button class="btn btn-ghost" onclick="show('screen-dashboard')">العودة إلى لوحة التحكم</button>
+  </div>
+
+  <div class="dash-grid">
+    <div class="card col-5">
+      <h3 id="userFormTitle">إنشاء مستخدم جديد</h3>
+      <div class="sub">أنشئ حسابًا جديدًا أو عدّل حسابًا قائمًا. كلمة المرور لا تقل عن ٨ خانات وتحتوي حرفًا ورقمًا.</div>
+      <div id="userFormError" style="display:none;margin:10px 0;padding:10px 12px;border-radius:10px;background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.35);color:#a30b1e;font-size:13px"></div>
+      <div id="userFormOk"    style="display:none;margin:10px 0;padding:10px 12px;border-radius:10px;background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.35);color:#0f5132;font-size:13px"></div>
+
+      <div class="field">
+        <label>اسم المستخدم (لاتيني)</label>
+        <input id="uf_username" placeholder="مثال: a.alharbi" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>الاسم الكامل (عربي)</label>
+        <input id="uf_name" placeholder="مثال: أحمد الحربي"/>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>الإدارة</label>
+          <select id="uf_dept">
+            <option>التشغيل</option>
+            <option>التقنية</option>
+            <option>خدمة المستفيد</option>
+            <option>تحليل البيانات</option>
+            <option>الموارد البشرية</option>
+            <option>المالية</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>الدور</label>
+          <select id="uf_role">
+            <option value="staff">موظف تشغيل</option>
+            <option value="supervisor">مشرف</option>
+            <option value="manager">إداري</option>
+            <option value="admin">مسؤول النظام</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input id="uf_pass" type="password" placeholder="٨ خانات على الأقل"/>
+        </div>
+        <div class="field">
+          <label>تأكيد كلمة المرور</label>
+          <input id="uf_pass2" type="password" placeholder="أعد إدخالها"/>
+        </div>
+      </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px">
+          <input id="uf_active" type="checkbox" checked/> الحساب مُفعّل
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="submitUserForm()">حفظ</button>
+        <button class="btn btn-ghost" onclick="resetUserForm()">إفراغ النموذج</button>
+        <button id="uf_genBtn" class="btn btn-ghost" type="button" onclick="generatePassword()">توليد كلمة مرور قوية</button>
+      </div>
+      <div class="hint" style="margin-top:10px">
+        ملاحظة: التطبيق يعمل بالكامل في متصفّحك (localStorage). لا تستخدم نفس البيانات في بيئة إنتاج بدون خادم آمن.
+      </div>
+    </div>
+
+    <div class="card col-7">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <h3 style="margin:0">قائمة المستخدمين</h3>
+          <div class="sub" id="userListMeta">— مستخدمين</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <input id="userSearch" placeholder="🔍 بحث..." style="padding:8px 10px;border-radius:10px;border:1px solid #d9e1ee;background:#fff;color:#0b2545;font-family:inherit" oninput="renderUsersTable()"/>
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin-top:10px">
+        <table class="data-table" id="usersTable">
+          <thead>
+            <tr>
+              <th>اسم المستخدم</th>
+              <th>الاسم</th>
+              <th>الإدارة</th>
+              <th>الدور</th>
+              <th>الحالة</th>
+              <th>أنشئ في</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="toast" id="toast"><div class="ico">★</div><span id="toastMsg">رسالة</span></div>
+
+<script>
+/* ============================================================
+   CORE STATE
+============================================================ */
+const COMPETENCIES = {
+  C1:{ar:"فهم المستفيد",full:"فهم المستفيد والتعامل مع احتياجاته",color:"#1D4ED8"},
+  C2:{ar:"التحليل",full:"التفكير التحليلي وحل المشكلات",color:"#0891B2"},
+  C3:{ar:"اتخاذ القرار",full:"اتخاذ القرار",color:"#7C3AED"},
+  C4:{ar:"الذكاء الموقفي",full:"الذكاء الموقفي Situational Judgment",color:"#DB2777"},
+  C5:{ar:"القيادة والتأثير",full:"القيادة والتأثير",color:"#C9A227"},
+  C6:{ar:"التواصل المهني",full:"التواصل المهني",color:"#059669"},
+  C7:{ar:"الانضباط",full:"الانضباط والاعتمادية",color:"#475569"},
+  C8:{ar:"التعلم والتطور",full:"قابلية التعلم والتطور",color:"#EA580C"}
+};
+
+const LEVELS = {
+  HLP:{label:"High Leadership Potential",ar:"إمكانات قيادية عالية",class:"lvl-HLP",desc:"مرشّح قوي لأدوار قيادية مستقبلية. اتخاذ قرار ناضج، فهم سياقي عميق، وقدرة على التأثير."},
+  EP :{label:"Emerging Potential",ar:"إمكانات قيادية واعدة",class:"lvl-EP",desc:"مؤشرات قيادية واضحة، تحتاج إلى تطوير موجّه في محورين على الأكثر للارتقاء."},
+  FP :{label:"Functional Performer",ar:"أداء جيد في الدور الحالي",class:"lvl-FP",desc:"يؤدي دوره الحالي بكفاءة، لكن الجاهزية القيادية محدودة في الوقت الراهن."},
+  DR :{label:"Development Required",ar:"يحتاج خطة تطوير",class:"lvl-DR",desc:"يحتاج خطة تطوير واضحة قبل التفكير في أدوار أكبر، خصوصًا في القيادة واتخاذ القرار."},
+  RM :{label:"Role Misalignment Risk",ar:"خطر عدم المواءمة",class:"lvl-RM",desc:"قد لا يتناسب أسلوبه أو قدراته مع متطلبات الدور؛ يُوصى بإعادة تقييم المواءمة."}
+};
+
+/* ============================================================
+   PRELIMINARY QUESTIONS
+============================================================ */
+const PRE_QUESTIONS = [
+  {id:"p1",q:"ما الدور الوظيفي الحالي؟",type:"select",opts:["موظف تشغيل","مشرف","إداري","قائد فريق","أخصائي تخصصي"]},
+  {id:"p2",q:"كم عدد سنوات خبرتك؟",type:"select",opts:["أقل من 5","5 – 10","10 – 15","أكثر من 15"]},
+  {id:"p3",q:"ما طبيعة عملك الحالي؟",type:"select",opts:["تشغيلي ميداني","تشغيلي مكتبي","تقني","تحليل بيانات","خدمة المستفيد","إشرافي/إداري"]},
+  {id:"p4",q:"ما مدى تعاملك المباشر مع المستفيدين؟",type:"select",opts:["يومي ومستمر","متكرر","عرضي","غير مباشر"]},
+  {id:"p5",q:"ما عدد الأفراد الذين تشرف عليهم حاليًا؟",type:"select",opts:["لا يوجد","1 – 3","4 – 8","9 – 20","أكثر من 20"]},
+  {id:"p6",q:"كيف تصف أسلوبك في اتخاذ القرار؟",type:"select",opts:["أتأنّى وأجمع البيانات الكاملة قبل القرار","أوازن بين السرعة والدقة","أتشاور ثم أحسم سريعًا","أعتمد على الحدس عند الضغط"]},
+  {id:"p7",q:"كيف تتعامل مع الضغط؟",type:"select",opts:["أرتّب الأولويات وأركّز على الأهم","أستعين بفريقي","أنجز الأسهل أولًا لتخفيف الحمل","أعمل لساعات إضافية حتى الإنجاز"]},
+  {id:"p8",q:"تفضيلك في العمل؟",type:"select",opts:["فردي لإنجاز أعلى","جماعي لإثراء الفكرة","حسب طبيعة المهمة","قيادة فريق صغير"]},
+  {id:"p9",q:"إلى أي مدى تستخدم البيانات في عملك؟",type:"select",opts:["بشكل يومي","عند الحاجة","نادرًا","لا أستخدمها"]}
+];
+
+/* ============================================================
+   QUESTION BANK (40 initial)
+   each option carries score 0-4 per scoring rubric
+============================================================ */
+function Q(id,c,lvl,type,stem,context,opts,extra={}){
+  return {id,c,lvl,type,stem,context,opts,...extra};
+}
+const BANK = [
+/* ---------- C1 فهم المستفيد (8) ---------- */
+Q("C1-01","C1",1,"mcq",
+  "اتصل مستفيد غاضب يشكو من تأخر معاملته منذ أسبوعين، وأنت لست المسؤول المباشر. ما أفضل تصرف فوري؟",
+  "السياق: قسم خدمة المستفيد، ساعة الذروة، الموظف المختص في اجتماع.",
+  [
+    {t:"أعتذر عن التأخر، أُسجّل الشكوى رسميًا، أُعطيه رقم متابعة، وأتعهد بالرد خلال يوم عمل.",s:4},
+    {t:"أُحوّله إلى الموظف المختص فور انتهاء اجتماعه وأطلب منه الانتظار.",s:2},
+    {t:"أُهدّئه شفهيًا وأطلب منه الاتصال لاحقًا حين يكون المختص متاحًا.",s:1},
+    {t:"أبحث في النظام بسرعة وأُعطيه إجابة مبدئية حسب ما أراه.",s:3}
+  ]),
+Q("C1-02","C1",2,"bestworst",
+  "وردت شكوى متكررة من نفس المستفيد خلال شهر. اختر أفضل تصرف وأسوأ تصرف:",
+  "الشكاوى تشير إلى مشكلة جذرية في الإجراء وليست خطأ فرديًا.",
+  [
+    {t:"أُعالج الشكوى الحالية فقط دون فتح الإجراء؛ المستفيد يحتاج حلًا سريعًا.",s:1},
+    {t:"أُحلّل الشكاوى المتكررة كنمط، وأرفع تقريرًا لتعديل الإجراء.",s:4},
+    {t:"أعتذر للمستفيد رسميًا، وأمنحه أولوية في المعاملات القادمة.",s:2},
+    {t:"أُحيله مباشرة لمدير الإدارة لأن المشكلة تتجاوز صلاحياتي.",s:3}
+  ]),
+Q("C1-03","C1",2,"mcq",
+  "مستفيد يطلب خدمة خارج نطاق صلاحيتك ويُلحّ. ماذا تفعل؟",
+  "الخدمة المطلوبة ممكنة لكن تحتاج موافقة جهة أخرى وقد تستغرق أيامًا.",
+  [
+    {t:"أوضّح له الإجراء النظامي بلغة بسيطة، وأرشده للجهة المختصة مع تقدير زمني واقعي.",s:4},
+    {t:"أُحاول إنجازها بنفسي مراعاة لإلحاحه، حتى لو خرجت عن صلاحياتي.",s:0},
+    {t:"أعتذر بأن هذا ليس اختصاصي، وأطلب منه مراجعة الجهة المعنية.",s:2},
+    {t:"أتواصل مع الجهة المختصة نيابة عنه وأُحدّد له موعدًا.",s:3}
+  ]),
+Q("C1-04","C1",1,"ranking",
+  "رتّب الخطوات التالية عند استقبال شكوى مستفيد من الأكثر إلى الأقل أولوية:",
+  "الترتيب يعكس فهمك العملي لمعالجة الشكاوى.",
+  [
+    {t:"الإنصات الكامل وفهم جوهر الشكوى",rank:1},
+    {t:"التحقق من البيانات في النظام",rank:2},
+    {t:"تقديم رد واضح ومسار حل",rank:3},
+    {t:"تسجيل الشكوى لتحليل الأنماط لاحقًا",rank:4}
+  ]),
+Q("C1-05","C1",2,"mcq",
+  "لاحظت أن نص رسالة آلية تُرسل للمستفيدين تحتوي على مصطلح فني يُربكهم. ما تصرفك؟",
+  "أنت موظف تشغيل ولست مسؤولًا عن النصوص.",
+  [
+    {t:"أرفع اقتراحًا بصيغة بديلة مدعومًا بأمثلة من شكاوى المستفيدين.",s:4},
+    {t:"أُبلّغ زملائي شفهيًا حتى يشرحوا للمستفيدين عند الاتصال.",s:1},
+    {t:"أنتظر حتى يطرأ تعديل رسمي، فالمسألة ليست من اختصاصي.",s:0},
+    {t:"أعدّل الرد الذي أُرسله شخصيًا للمستفيدين فقط.",s:2}
+  ]),
+Q("C1-06","C1",3,"scenario",
+  "تكرر اعتراض مستفيدين على رسوم خدمة جديدة. الإدارة العليا تريد بقاء الرسوم. ما أنسب تصرف؟",
+  "الرسوم نظامية لكنها لم تُشرح جيدًا، وتسببت في موجة شكاوى.",
+  [
+    {t:"أقترح حملة توعية موجزة توضّح المقابل القيمي للرسوم، مع تحسين رسالة الإشعار.",s:4},
+    {t:"أُعِدّ ردًّا موحّدًا للموظفين ليُوضّحوا للمستفيدين أن الرسوم نظامية وغير قابلة للنقاش.",s:2},
+    {t:"أرفع تقريرًا للإدارة بأن الرسوم سبب رئيسي في تراجع الرضا.",s:3},
+    {t:"أتعامل مع كل اعتراض على حدة وأُحاول إقناع المستفيد فرديًا.",s:1}
+  ]),
+Q("C1-07","C1",2,"bestworst",
+  "مستفيد كبير في السن لا يفهم الإجراء الإلكتروني. اختر أفضل وأسوأ تصرف:",
+  "أمامك ٧ مستفيدين في الانتظار.",
+  [
+    {t:"أُكلّف زميلًا بمساعدته خطوة بخطوة، وأستمر في خدمة الباقين.",s:4},
+    {t:"أطلب منه إحضار أحد أقاربه ليساعده والعودة لاحقًا.",s:1},
+    {t:"أُنجز له المعاملة بنفسي بسرعة لتوفير وقت الجميع.",s:3},
+    {t:"أُحيله لمكتب آخر مختص بكبار السن إن وُجد.",s:2}
+  ]),
+Q("C1-08","C1",3,"mcq",
+  "بعد تحليل الشكاوى وجدت أن ٧٠٪ منها سببها خطوة واحدة في الإجراء. ما تصرفك القيادي؟",
+  "أنت مشرف، والقرار النهائي بيد إدارة العمليات.",
+  [
+    {t:"أرفع مذكرة مع بيانات وتوصية ببديل، وأقترح اختبارًا تجريبيًا لمدة شهر.",s:4},
+    {t:"أُبلّغ مديري شفهيًا، فالقرار ليس بيدي.",s:1},
+    {t:"أُدرّب الموظفين على شرح هذه الخطوة بشكل أفضل للمستفيدين.",s:2},
+    {t:"أنشر إرشادات داخلية لتقليل وقت تنفيذ هذه الخطوة.",s:3}
+  ]),
+
+/* ---------- C2 التحليل (5) ---------- */
+Q("C2-01","C2",1,"mcq",
+  "ارتفع زمن إنجاز المعاملة في فرع معين بنسبة ٤٠٪ خلال أسبوعين. أول خطوة منطقية؟",
+  "البيانات متاحة في النظام، والفريق لم يتغير.",
+  [
+    {t:"أُحلّل البيانات للبحث عن تغيّر في نوع المعاملات أو حجمها.",s:4},
+    {t:"أعقد اجتماعًا مع الفريق لمعرفة ما حدث.",s:2},
+    {t:"أُكلّف موظفًا إضافيًا لتسريع الإنجاز.",s:1},
+    {t:"أراجع التغييرات الأخيرة في الإجراءات والأنظمة المرتبطة.",s:3}
+  ]),
+Q("C2-02","C2",2,"scenario",
+  "تظهر شكاوى عن «بطء النظام»، لكن مؤشرات الأداء التقني سليمة. ما الأرجح؟",
+  "العَرَض ليس دائمًا هو السبب.",
+  [
+    {t:"المشكلة قد تكون في تجربة المستخدم أو تدفق العمل، لا في النظام نفسه.",s:4},
+    {t:"الفِرَق التقنية تخفي بيانات حقيقية عن الأداء.",s:0},
+    {t:"المستفيدون يبالغون لأن لديهم تجارب سابقة سلبية.",s:1},
+    {t:"المؤشرات لا تقيس وقت انتظار المستفيد فعليًا.",s:3}
+  ]),
+Q("C2-03","C2",2,"ranking",
+  "رتّب خطوات تحليل مشكلة تشغيلية من الأهم إلى الأقل:",
+  "اعتمد على منهج السبب الجذري.",
+  [
+    {t:"تعريف المشكلة بدقة وقياسها",rank:1},
+    {t:"جمع البيانات والشواهد",rank:2},
+    {t:"تحديد السبب الجذري",rank:3},
+    {t:"اقتراح الحلول وتجربتها",rank:4}
+  ]),
+Q("C2-04","C2",3,"mcq",
+  "لديك ٣ مؤشرات تتعارض حول جودة الخدمة: رضا المستفيد مرتفع، زمن الإنجاز جيد، ولكن تكرار المراجعة عالٍ. ما الاستنتاج الأقرب؟",
+  "البيانات قد تخفي مشكلة في «اكتمال» الخدمة.",
+  [
+    {t:"الخدمة تُنجَز بسرعة لكنها غير مكتملة من المرة الأولى.",s:4},
+    {t:"المستفيدون راضون شكليًا فقط.",s:2},
+    {t:"المؤشرات متناقضة وتحتاج إعادة تعريف.",s:3},
+    {t:"تكرار المراجعة طبيعي في خدمات معينة.",s:1}
+  ]),
+Q("C2-05","C2",1,"bestworst",
+  "تواجه خطأً متكررًا في تقرير شهري. اختر أفضل وأسوأ تصرف:",
+  "الخطأ يؤثر على قرارات الإدارة.",
+  [
+    {t:"أتتبّع مصدر الخطأ في البيانات، ثم أصحّح المنبع لا التقرير فقط.",s:4},
+    {t:"أُصحّح التقرير الحالي وأنبّه من تسبب في الخطأ.",s:2},
+    {t:"أُضيف ملاحظة في التقرير حول الانحراف المحتمل.",s:1},
+    {t:"أُبلّغ مديري وأنتظر التعليمات.",s:3}
+  ]),
+
+/* ---------- C3 اتخاذ القرار (5) ---------- */
+Q("C3-01","C3",1,"mcq",
+  "طُلب منك قرار عاجل خلال ساعة، والمعلومات ناقصة بنسبة ٣٠٪. ما تصرفك؟",
+  "التأجيل يُكلّف، والقرار الخاطئ مُكلِف أكثر.",
+  [
+    {t:"أتخذ القرار بناءً على ٧٠٪ المتاحة مع خطة احتياطية للسيناريو الأسوأ.",s:4},
+    {t:"أُؤجّل القرار حتى تكتمل المعلومات.",s:1},
+    {t:"أُحوّله إلى مديري لاتخاذ القرار.",s:2},
+    {t:"أتخذ القرار وفق الحدس مع توثيق المنطق.",s:3}
+  ]),
+Q("C3-02","C3",2,"scenario",
+  "خياران: حل سريع جزئي اليوم، أو حل شامل بعد أسبوع. الخدمة متوقفة جزئيًا. أيهما تختار ولماذا؟",
+  "تأثير التوقف يتفاقم يوميًا.",
+  [
+    {t:"الحل السريع لاحتواء التأثير، مع جدولة الحل الشامل خلال أسبوع.",s:4},
+    {t:"الحل الشامل لأن الجزئي قد يُؤجّل المعالجة الجذرية.",s:2},
+    {t:"أُطبّق الحل السريع فقط؛ الشامل قد لا يكون ضروريًا.",s:1},
+    {t:"أعرض الخيارين على الإدارة ليقرروا.",s:3}
+  ]),
+Q("C3-03","C3",2,"bestworst",
+  "اقترح موظف فكرة تخالف توجيهات الإدارة لكنها واعدة. اختر أفضل وأسوأ تصرف:",
+  "تحتاج لموازنة بين الانضباط والابتكار.",
+  [
+    {t:"أرفعها رسميًا للإدارة كاقتراح تطويري مع تحليل الأثر.",s:4},
+    {t:"أعتمدها داخل فريقي تجريبيًا، فالنتيجة ستُبرّر القرار.",s:1},
+    {t:"أرفضها التزامًا بالتوجيهات.",s:2},
+    {t:"أُؤجّل النقاش حتى يتغيّر التوجيه.",s:0}
+  ]),
+Q("C3-04","C3",3,"mcq",
+  "خيار يُعطي ربحًا تشغيليًا عاليًا قصير المدى لكنه يُضرّ بثقة المستفيدين على المدى الطويل. ما القرار؟",
+  "الإدارة العليا تركّز على المؤشرات الفصلية.",
+  [
+    {t:"أرفض الخيار وأقترح بديلًا متوازنًا، مع توضيح المخاطر للإدارة.",s:4},
+    {t:"أعتمده مع خطة لاحقة لاسترداد الثقة.",s:1},
+    {t:"أعرضه على الإدارة مع كلا الجانبين، والقرار النهائي لها.",s:3},
+    {t:"أعتمد بديلًا منخفض الأثر تجنبًا للمخاطرة.",s:2}
+  ]),
+Q("C3-05","C3",1,"ranking",
+  "رتّب معايير القرار الجيد من الأكثر أهمية إلى الأقل:",
+  "في سياق تشغيلي يومي.",
+  [
+    {t:"الأثر على المستفيد",rank:1},
+    {t:"المخاطر التشغيلية",rank:2},
+    {t:"الكلفة والوقت",rank:3},
+    {t:"رأي الفريق المنفّذ",rank:4}
+  ]),
+
+/* ---------- C4 الذكاء الموقفي (5) ---------- */
+Q("C4-01","C4",1,"mcq",
+  "زميلك يُقاطعك في اجتماع ويتبنّى فكرتك دون نسبتها لك. ما أنسب تصرف؟",
+  "الاجتماع يحضره مديرك المباشر.",
+  [
+    {t:"أُكمل بهدوء: «نعم، هذه النقطة التي طرحتها قبل قليل، وأودّ توسيعها بـ...».",s:4},
+    {t:"أصمت، وأناقش الأمر معه على انفراد لاحقًا.",s:2},
+    {t:"أُوضّح للجميع أن الفكرة فكرتي.",s:1},
+    {t:"أتجاهل الموقف؛ المهم نجاح الفكرة.",s:3}
+  ]),
+Q("C4-02","C4",2,"scenario",
+  "ضغط عالٍ، موعد نهائي بعد ساعتين، وعضو في الفريق ارتكب خطأ كبيرًا. كيف تتصرف؟",
+  "اللوم الآن قد يُربك التنفيذ.",
+  [
+    {t:"أحتوي الموقف فورًا، أعيد توزيع المهمة، وأناقش الخطأ بعد التسليم.",s:4},
+    {t:"أُوقف العمل وأُعيد المراجعة كاملة.",s:1},
+    {t:"أُبلّغ مديري وأطلب تأجيل التسليم.",s:2},
+    {t:"أُعاقب الموظف فورًا ليكون عبرة.",s:0}
+  ]),
+Q("C4-03","C4",2,"bestworst",
+  "موظفان يختلفان علنًا في اجتماع. اختر أفضل وأسوأ تصرف كقائد للجلسة:",
+  "النقاش بدأ يخرج عن إطاره المهني.",
+  [
+    {t:"أُعيد التركيز على الهدف، وأطلب من كل طرف صياغة موقفه في جملة واحدة.",s:4},
+    {t:"أوقف الاجتماع وأطلب لقاءً ثنائيًا معهما لاحقًا.",s:3},
+    {t:"أنحاز للرأي الأكثر منطقية لإنهاء الجدال.",s:1},
+    {t:"أتجاهل الخلاف وأُكمل جدول الأعمال.",s:0}
+  ]),
+Q("C4-04","C4",3,"mcq",
+  "وُكّل إليك مشروع حساس، وزميل خبير لكنه «صعب التعامل». كيف تبدأ؟",
+  "تحتاج خبرته، لكن لا تريد توتر العلاقة.",
+  [
+    {t:"أبدأ بلقاء قصير لفهم اهتماماته المهنية، وأُشركه مبكرًا في تصميم المشروع.",s:4},
+    {t:"أُكلّفه بمهام محددة فقط لتجنّب الاحتكاك.",s:2},
+    {t:"أُحاول إنجازه بنفسي قدر الإمكان.",s:1},
+    {t:"أعتمد على بقية الفريق وأطلب رأيه فقط عند الحاجة.",s:3}
+  ]),
+Q("C4-05","C4",1,"ranking",
+  "رتّب الأولويات في يوم عمل مزدحم:",
+  "اخترت من قائمة مهام قائمة.",
+  [
+    {t:"مشكلة عاجلة لمستفيد VIP",rank:1},
+    {t:"اجتماع مع المدير التنفيذي",rank:2},
+    {t:"تقرير شهري موعده غدًا",rank:3},
+    {t:"رد على إيميلات داخلية روتينية",rank:4}
+  ]),
+
+/* ---------- C5 القيادة والتأثير (5) ---------- */
+Q("C5-01","C5",1,"mcq",
+  "عضو في فريقك أداؤه متراجع منذ شهر. ما أول خطوة قيادية؟",
+  "ليس لديك سلطة تأديبية مباشرة.",
+  [
+    {t:"محادثة فردية للاستماع وفهم السبب قبل الحكم.",s:4},
+    {t:"إنذار مكتوب ليُدرك جدية الموقف.",s:1},
+    {t:"إعادة توزيع مهامه على بقية الفريق.",s:2},
+    {t:"رفع الأمر للموارد البشرية.",s:0}
+  ]),
+Q("C5-02","C5",2,"scenario",
+  "فريقك مُحبَط بسبب تأخر اعتماد مشروع كان يعمل عليه منذ ٣ أشهر. كيف تتصرف؟",
+  "أنت لست متخذ القرار.",
+  [
+    {t:"أُصارحهم بالواقع، أُبيّن المكسب من الخبرة المكتسبة، وأطرح خطوات قابلة للتنفيذ الآن.",s:4},
+    {t:"أُهدّئهم بأن المشروع سيُعتمد قريبًا، حتى لو لم أتأكد.",s:1},
+    {t:"أتجنّب الموضوع وأُكلّفهم بمهام أخرى.",s:2},
+    {t:"أرفع شكوى للإدارة بشأن تأثير التأخر على الروح المعنوية.",s:3}
+  ]),
+Q("C5-03","C5",2,"bestworst",
+  "قُدّم لك شكر علني عن إنجاز شارك فيه فريق كامل. اختر أفضل وأسوأ تصرف:",
+  "الموقف أمام الإدارة العليا.",
+  [
+    {t:"أشكر الإدارة وأنسب الإنجاز للفريق بأسماء محددة.",s:4},
+    {t:"أتقبّل الشكر بأدب وأُذكّر لاحقًا داخليًا بدور الفريق.",s:2},
+    {t:"أتقبّل الشكر؛ القيادة تتحمل النتائج فلتأخذ التقدير.",s:1},
+    {t:"أُحوّل الشكر علنًا للفريق دون أن أتحدث عن دوري.",s:3}
+  ]),
+Q("C5-04","C5",3,"mcq",
+  "مطلوب منك إقناع إدارة موازية بتعديل إجراء مشترك يُعطّل عملك. ليس لديك سلطة عليها. كيف؟",
+  "العلاقة بينكما مهنية وحساسة.",
+  [
+    {t:"أُجهّز بيانات الأثر وأقترح تعديلًا يُحقّق مكسبًا للطرفين، ثم أعرضه ودّيًا.",s:4},
+    {t:"أرفع الموضوع إلى مدير مشترك ليُلزمهم بالتعديل.",s:2},
+    {t:"أُغيّر إجراءاتي الداخلية لاستيعاب التعطيل.",s:1},
+    {t:"أُرسل إيميلًا رسميًا أطلب فيه التعديل لأسباب تشغيلية.",s:3}
+  ]),
+Q("C5-05","C5",1,"ranking",
+  "رتّب صفات القائد الأهم في بيئة تشغيلية:",
+  "حسب أثرها اليومي على الفريق.",
+  [
+    {t:"الوضوح في التوجيه",rank:1},
+    {t:"العدالة في التعامل",rank:2},
+    {t:"التحفيز والدعم",rank:3},
+    {t:"الحضور الميداني",rank:4}
+  ]),
+
+/* ---------- C6 التواصل المهني (4) ---------- */
+Q("C6-01","C6",1,"mcq",
+  "أرسل لك مدير من إدارة أخرى رسالة فيها لوم غير دقيق. ردّك المهني؟",
+  "أمامك فرصة لإصلاح المعلومة دون توتير العلاقة.",
+  [
+    {t:"رد موجز يُوضّح الوقائع بأدلة، ويفتح الباب للاجتماع.",s:4},
+    {t:"رد مطوّل يُفنّد كل نقطة في رسالته.",s:2},
+    {t:"أتجاهل الرسالة وأنتظر اجتماعًا مباشرًا.",s:1},
+    {t:"أُحوّل الرد لمديري ليتعامل معها.",s:3}
+  ]),
+Q("C6-02","C6",2,"bestworst",
+  "اعترض مستفيد على رد رسمي مكتوب. اختر أفضل وأسوأ صياغة:",
+  "الرد الرسمي يُسجَّل في النظام.",
+  [
+    {t:"«شكرًا على ملاحظتك. أعدنا مراجعة معاملتك ووجدنا أن... وستُعالَج الخطوة المتبقية خلال يومين».",s:4},
+    {t:"«إجراءاتنا نظامية ولا يمكن تجاوزها».",s:1},
+    {t:"«نعتذر عن الإزعاج، سنرى ما يمكن فعله».",s:2},
+    {t:"«تم تحويل ملاحظتك للمختص».",s:3}
+  ]),
+Q("C6-03","C6",2,"mcq",
+  "تحتاج لإيصال خبر سيئ لفريقك (تخفيض ميزانية مشروع). كيف تبدأ؟",
+  "الفريق متفائل بالمشروع.",
+  [
+    {t:"أُصارحهم بالواقع وأسبابه، ثم أنتقل لخيارات إعادة الترتيب.",s:4},
+    {t:"أُبدأ بالإيجابيات وأُخفّف وقع الخبر تدريجيًا.",s:3},
+    {t:"أُرسل بريدًا رسميًا بدلًا من اللقاء المباشر.",s:1},
+    {t:"أُؤجّل الإبلاغ حتى تتضح الصورة.",s:2}
+  ]),
+Q("C6-04","C6",3,"scenario",
+  "لديك ٢٠ دقيقة لإقناع إدارة عليا بمشروع تشغيلي مُعقّد. ما البنية المثلى للعرض؟",
+  "ميزانية محدودة، ووقت ضيق.",
+  [
+    {t:"المشكلة → الأثر بالأرقام → الحل → المخاطر → الطلب الواضح.",s:4},
+    {t:"خلفية تاريخية → تفاصيل تقنية → النتائج المتوقعة.",s:2},
+    {t:"عرض جميع الخيارات بالتساوي وترك الإدارة تختار.",s:3},
+    {t:"شرح الحل ابتداءً ثم تبريره.",s:1}
+  ]),
+
+/* ---------- C7 الانضباط والاعتمادية (4) ---------- */
+Q("C7-01","C7",1,"mcq",
+  "وُكِّلت إليك مهمة بموعد تسليم بعد أسبوع. ماذا تفعل في اليوم الأول؟",
+  "لديك أعباء أخرى متراكمة.",
+  [
+    {t:"أُجهّز خطة بمعالم زمنية صغيرة وأبدأ التنفيذ.",s:4},
+    {t:"أُنجز أسهل الأجزاء أولًا.",s:2},
+    {t:"أُؤجّل البدء حتى أنتهي من المهام الأخرى.",s:1},
+    {t:"أُحاول إنجاز نصفها مباشرة لتقليل الضغط لاحقًا.",s:3}
+  ]),
+Q("C7-02","C7",2,"bestworst",
+  "اكتشفت أن إجراءً تتبعه فريقك مخالف للسياسة لكنه أكثر كفاءة. اختر أفضل وأسوأ تصرف:",
+  "المخالفة بسيطة لكنها موثّقة.",
+  [
+    {t:"أُوقف الإجراء فورًا وأرفع اقتراحًا رسميًا لتعديل السياسة.",s:4},
+    {t:"أحتفظ به لأنه أكثر كفاءة، فالسياسة قديمة.",s:0},
+    {t:"أُبلّغ مديري وأنتظر قراره.",s:3},
+    {t:"أُطبّق السياسة في الأمور الموثّقة فقط.",s:1}
+  ]),
+Q("C7-03","C7",2,"mcq",
+  "زميل يطلب منك تجاوز خطوة تدقيق صغيرة لتسريع معاملة. ما تصرفك؟",
+  "الخطوة شكلية في رأيه، لكنها سياسة مكتوبة.",
+  [
+    {t:"أرفض بأدب، وأُوضّح المخاطر وأقترح بديلًا لتسريع الخطوة دون تجاوزها.",s:4},
+    {t:"أوافق هذه المرة فقط لمساعدة الزميل.",s:0},
+    {t:"أُحيله للمدير ليأخذ قرارًا.",s:2},
+    {t:"أرفض دون شرح؛ السياسة سياسة.",s:2}
+  ]),
+Q("C7-04","C7",1,"ranking",
+  "رتّب أهم سلوكيات الموثوقية في بيئة العمل:",
+  "اعتمد على ما يبني الثقة فعليًا.",
+  [
+    {t:"الوفاء بالوعود الزمنية",rank:1},
+    {t:"الإبلاغ المبكر عن المخاطر",rank:2},
+    {t:"الالتزام بالإجراءات",rank:3},
+    {t:"المتابعة الذاتية للمهام",rank:4}
+  ]),
+
+/* ---------- C8 التعلم والتطور (4) ---------- */
+Q("C8-01","C8",1,"mcq",
+  "تلقيت ملاحظة سلبية عن أدائك. ما تصرفك المهني؟",
+  "الملاحظة من مديرك المباشر.",
+  [
+    {t:"أُصغي، أطلب أمثلة محددة، وأُعِدّ خطة تحسين خلال أسبوع.",s:4},
+    {t:"أُدافع عن نفسي وأُوضّح ظروفي.",s:1},
+    {t:"أتقبّل الملاحظة دون مناقشة.",s:2},
+    {t:"أطلب رأيًا ثانيًا من زميل أثق به.",s:3}
+  ]),
+Q("C8-02","C8",2,"scenario",
+  "نظام جديد سيُعتمد بعد شهر، وفريقك مقاوم للتغيير. كيف تتعامل؟",
+  "أنت مشرف الفريق.",
+  [
+    {t:"أبدأ بفهم مخاوفهم، ثم أُجهّز تجربة عملية صغيرة قبل الإطلاق.",s:4},
+    {t:"أُلزمهم بالتدريب وأُشدّد على أهمية التغيير.",s:2},
+    {t:"أنتظر ضغط الإدارة العليا ليتقبّلوا التغيير.",s:1},
+    {t:"أبدأ بنفسي وأُظهر النتائج لتشجيعهم.",s:3}
+  ]),
+Q("C8-03","C8",2,"bestworst",
+  "عُرض عليك دور مؤقت في إدارة أخرى لمدة ٦ أشهر. اختر أفضل وأسوأ تصرف:",
+  "الدور خارج تخصصك المباشر.",
+  [
+    {t:"أقبل بعد فهم الأهداف، وأرى فيه فرصة لتوسيع كفاءاتي.",s:4},
+    {t:"أرفض حفاظًا على استقراري الوظيفي.",s:1},
+    {t:"أقبل بشرط ضمانات للعودة لدوري السابق.",s:3},
+    {t:"أوافق دون فهم تفاصيل الدور تحاشيًا للإحراج.",s:0}
+  ]),
+Q("C8-04","C8",3,"mcq",
+  "فشلت تجربة قُدتها. ماذا تفعل بعدها؟",
+  "كان للفشل أسباب خارجة وأخرى داخلية.",
+  [
+    {t:"أُجري تحليلًا صريحًا للأسباب، أُوثّق الدروس، وأُشاركها مع الفريق.",s:4},
+    {t:"أُركّز على الأسباب الخارجية وأُقدّم تقريرًا للإدارة.",s:1},
+    {t:"أتجاوز التجربة وأبدأ مشروعًا جديدًا.",s:2},
+    {t:"أعتذر للفريق وأطلب فرصة جديدة.",s:3}
+  ]),
+
+/* ===== أسئلة إضافية لتنويع البنك (مرحلة التحدي / ضغط الوقت / الاتساق) ===== */
+Q("C1-09","C1",2,"firstAction",
+  "تلقّيت ٣ شكاوى متباينة من ٣ مستفيدين خلال نصف ساعة، كلٌّ منها عاجلة. ما الذي ستفعله أولًا؟",
+  "أنت الموظف الوحيد المتاح، ومدير الإدارة في إجازة.",
+  [
+    {t:"أُصنّف الشكاوى حسب الأثر على المستفيد، وأبدأ بالأعلى أثرًا.",s:4},
+    {t:"أعالج الشكاوى بترتيب وصولها لتجنّب التحيّز.",s:2},
+    {t:"أُكلّف زميلًا بمعالجة اثنتين، وأحتفظ بالأكثر تعقيدًا.",s:3},
+    {t:"أُبلّغ الثلاثة بزمن متوقّع للرد، ثم أعالج الأبسط لاكتساب وقت.",s:1}
+  ]),
+Q("C1-10","C1",3,"timed",
+  "[٤٥ ثانية] مستفيد على الهاتف يُهدّد بنشر شكوى علنية بعد ١٠ دقائق. الشكوى صحيحة جزئيًا. أفضل تصرف فوري؟",
+  "اختبار قرار تحت ضغط الوقت — يُسجَّل زمن الاستجابة.",
+  [
+    {t:"أعتذر عن الجزء الصحيح، أُعطيه التزامًا واضحًا بإجراء، وأطلب مهلة ٢٤ ساعة قبل النشر.",s:4},
+    {t:"أتجاوز صلاحياتي وأَعِده بحلٍّ فوري لاحتواء الموقف.",s:0},
+    {t:"أُحيله لمدير الإدارة وأنهي المكالمة.",s:1},
+    {t:"أُسجّل الشكوى وأُخبره أن الإجراءات النظامية ستأخذ مجراها.",s:2}
+  ], {timer:45}),
+Q("C1-11","C1",3,"scenario",
+  "تحليل الشكاوى أظهر أن ٤٠٪ منها تتعلق بسوء فهم لإشعار آلي يصل المستفيد. مديرك التقني لا يرى أن هذه أولوية. ما تحرّكك؟",
+  "أنت لست المسؤول عن النظام، لكنك المسؤول عن جودة التجربة.",
+  [
+    {t:"أُجهّز ورقة قرار ببدائل لصياغة الإشعار + تقدير لخفض الشكاوى، وأعرضها بمعطيات.",s:4},
+    {t:"أرفع الموضوع لقيادة عليا تُجبر التقنية على التحرك.",s:2},
+    {t:"أتعامل مع الشكاوى يدويًا حتى تتغير القناعات.",s:1},
+    {t:"أُنسّق ورشة قصيرة بين خدمة المستفيد والتقنية لمواءمة الفهم.",s:3}
+  ]),
+Q("C3-06","C3",3,"timed",
+  "[٤٠ ثانية] انقطاع خدمة فعلي يؤثر على ٣٠٠ مستفيد. أمامك ٣ خيارات إصلاح، كلٌّ ينقذ شريحة. اختر فورًا:",
+  "السرعة جوهرية، والمعلومات ٧٠٪ كاملة.",
+  [
+    {t:"الخيار الذي يُعيد الخدمة لأكبر شريحة ولو جزئيًا، مع جدولة المتبقي.",s:4},
+    {t:"الإصلاح الكامل لشريحة صغيرة مؤثرة (VIP).",s:2},
+    {t:"تأجيل القرار لجمع بيانات أكثر دقة.",s:0},
+    {t:"تدوير المهام بين الخيارات الثلاثة بالتساوي.",s:1}
+  ], {timer:40}),
+Q("C5-06","C5",3,"firstAction",
+  "كُلّفت بقيادة فريق متعدّد التخصصات لإطلاق خدمة جديدة خلال ٤ أسابيع. ماذا ستفعل أولًا؟",
+  "أعضاء الفريق لم يعملوا معًا سابقًا.",
+  [
+    {t:"عقد جلسة مواءمة هدف وأدوار قبل أي عمل تنفيذي.",s:4},
+    {t:"تقسيم المهام فورًا حسب التخصص لربح الوقت.",s:2},
+    {t:"عقد لقاءات فردية للتعرف على نقاط قوة كل عضو.",s:3},
+    {t:"بدء التنفيذ بالأجزاء الواضحة وترتيب الباقي لاحقًا.",s:1}
+  ]),
+Q("C4-06","C4",3,"consistency",
+  "خلال يوم عمل ضاغط، تلقّيت تكليفًا عاجلًا من مديرك يتعارض مع موعد التزمت به مع زميل من إدارة أخرى. ما تصرفك؟",
+  "هذا السؤال يقيس الاتساق السلوكي مع موقفٍ سابق في نفس الجلسة.",
+  [
+    {t:"أُبلّغ زميلي فورًا بتأخّر مُحدّد، أُنفّذ التكليف، ثم أعود لالتزامي.",s:4},
+    {t:"أعتذر لمديري بأن لديّ التزامًا سابقًا وأطلب مهلة قصيرة.",s:3},
+    {t:"أُؤجّل التزام الزميل دون إخطاره فورًا حتى أنتهي.",s:1},
+    {t:"أُحاول إنجاز الاثنين بالتوازي تجنّبًا لإحراج أي طرف.",s:2}
+  ], {pairWith:"C7-03"}),
+Q("C7-05","C7",3,"consistency",
+  "زميل مقرّب يطلب منك تجاوز موعد تسليم رسمي بحجة وجيهة. ما تصرفك؟",
+  "هذا السؤال يقيس الاتساق السلوكي تحت ضغط العلاقات.",
+  [
+    {t:"أرفض بأدب وأقترح بديلًا نظاميًا (تمديد رسمي).",s:4},
+    {t:"أرفض دون تبرير لأن الموعد رسمي.",s:3},
+    {t:"أوافق هذه المرة فقط لمساعدته.",s:1},
+    {t:"أُحيل القرار لمديره ليتحمل المسؤولية.",s:2}
+  ], {pairWith:"C4-06"}),
+Q("C2-06","C2",3,"scenario",
+  "نتائج تحليل ربعي تُظهر تحسنًا في رضا المستفيد، لكن نسبة المشتركين الجدد تراجعت ٢٥٪. ما الاستنتاج المهني الأقرب؟",
+  "البيانات تحتاج قراءة متعددة الزوايا.",
+  [
+    {t:"الرضا قد يكون لشريحة محددة فقط؛ يلزم تقسيم البيانات حسب الفئات قبل الحكم.",s:4},
+    {t:"التراجع موسمي ولا علاقة له بالخدمة.",s:1},
+    {t:"الرضا والمشتركون مؤشّران مستقلان ولا يجب الربط بينهما.",s:2},
+    {t:"المنافسة هي السبب الأرجح لتراجع المشتركين.",s:3}
+  ]),
+Q("C1-12","C1",3,"firstAction",
+  "وردت شكوى علنية على وسائل التواصل من مستفيد تحوي معلومة جزئية صحيحة وأخرى مغلوطة. ماذا ستفعل أولًا؟",
+  "الإدارة الإعلامية تنتظر ردًا خلال ساعة.",
+  [
+    {t:"التحقق الكامل من الواقعة داخليًا قبل أي رد علني.",s:4},
+    {t:"إصدار رد مختصر يعتذر عن أي إزعاج ويعِد بالمتابعة.",s:3},
+    {t:"الرد علنًا بنفي المعلومة المغلوطة فورًا.",s:1},
+    {t:"تجاهل الشكوى لتجنّب تضخيمها.",s:0}
+  ])
+];
+
+/* ============================================================
+   ADAPTIVE GENERATOR — توليد أسئلة إضافية مشابهة
+   عند الحاجة لرفع/خفض الصعوبة في محور معين
+============================================================ */
+function generateAdaptive(comp,targetLvl,seed){
+  // قوالب توليدية مشابهة تستفيد من البنك وتُعيد ترتيب وتعديل الخيارات
+  const pool = BANK.filter(q=>q.c===comp);
+  const base = pool[seed % pool.length];
+  // create variant with shuffled options + adjusted level
+  const variant = JSON.parse(JSON.stringify(base));
+  variant.id = base.id+"-A"+seed;
+  variant.lvl = targetLvl;
+  variant.stem = "[نسخة مكافئة] "+variant.stem;
+  // shuffle options stably
+  const idx = variant.opts.map((_,i)=>i);
+  for(let i=idx.length-1;i>0;i--){const j=(seed*7+i)%(i+1);[idx[i],idx[j]]=[idx[j],idx[i]]}
+  variant.opts = idx.map(i=>variant.opts[i]);
+  return variant;
+}
+
+/* ============================================================
+   APP STATE
+============================================================ */
+const MASTERY = {
+  Beginner:    {ar:"مبتدئ",       desc:"معرفة محدودة في هذا المحور؛ يحتاج بناءً منهجيًا للأساسيات."},
+  Developing:  {ar:"قيد التطور",   desc:"معرفة جزئية مع تذبذب في الأداء؛ يحتاج تعزيزًا وتجارب موجهة."},
+  Proficient:  {ar:"كفؤ",         desc:"معرفة موثوقة في المستوى المتوسط؛ مرشح للتقدم بتجارب أعقد."},
+  Advanced:    {ar:"متقدّم",       desc:"إتقان عميق ومُختَبر بالمستويات العليا؛ جاهزية قيادية في هذا المحور."}
+};
+
+const STAGES = {
+  onboarding:{ar:"التهيئة",en:"Onboarding"},
+  core:{ar:"التقييم الأساسي",en:"Core Assessment"},
+  challenge:{ar:"التحدي",en:"Challenge"},
+  validation:{ar:"التحقق النهائي",en:"Final Validation"}
+};
+
+const BADGES_DEF = {
+  decision_precise:    {name:"قرار دقيق",        icon:"🎯", desc:"٣ إجابات قيادية متتالية"},
+  beneficiary_master:  {name:"فهم مستفيد متقدم",icon:"🤝", desc:"إتقان عالٍ في محور المستفيد"},
+  consistency:         {name:"ثبات في الأداء",   icon:"⚖️", desc:"تباين منخفض عبر ٥ أسئلة"},
+  analysis_excellence: {name:"تحليل متميز",     icon:"📊", desc:"إجابتان متتاليتان عاليتا الجودة في التحليل"},
+  pressure_resolver:   {name:"قرار تحت الضغط",  icon:"⏱️", desc:"أداء عالٍ في سؤال موقوت"},
+  challenger:          {name:"مواجهة التحدي",   icon:"⚡", desc:"اجتياز ٣ أسئلة بمستوى متقدم"},
+  validator:           {name:"تحقق ناجح",       icon:"✓",  desc:"إجابة قوية في سؤال تحقق"}
+};
+
+let state = {
+  user:null,
+  preAnswers:{},
+  testQueue:[],
+  testIdx:0,
+  answers:{},          // questionId -> {choice,score,c,lvl,confidence,learnerState,stage,timeMs}
+  competencyScores:{}, // c -> {sum,n,maxLvl}
+  knowledgeStates:{},  // c -> {mastered,unconscious,misinformed,doubt,recent:[]}
+  confidencePattern:[],// chronological [{c,lvl,correct,confidence,scoreNorm}]
+  consistency:[],
+  badges:[],           // earned badge ids
+  consecutiveMastered:0,
+  consecutiveAnalysis:0,
+  difficultyRaisedAt:[], // [{idx,c,fromLvl,toLvl,reason}]
+  stageStats:{
+    core:{seen:0,passed:0,total:0},
+    challenge:{seen:0,passed:0,total:0},
+    validation:{seen:0,passed:0,total:0}
+  },
+  maxChallengeLevel:0,
+  pairAnswers:{},      // for consistency: questionId -> learnerState
+  questionStartTime:0,
+  sessionStart:0,
+  records: loadRecords()
+};
+
+function loadRecords(){
+  try{
+    const raw = JSON.parse(localStorage.getItem("lap_records")||"[]");
+    // backfill missing fields for older records to avoid render crashes
+    return raw.map(r=>({
+      stagePass:{core:{seen:0,total:0,passed:0,rate:0},challenge:{seen:0,total:0,passed:0,rate:0},validation:{seen:0,total:0,passed:0,rate:0}},
+      badges:[], maxChallengeLevel:0, difficultyRaisedAt:[], totalQuestions:0,
+      patterns:[], masteries:{}, knowledgeStates:{}, ksAgg:{mastered:0,unconscious:0,misinformed:0,doubt:0}, ksAggPct:{mastered:0,unconscious:0,misinformed:0,doubt:0}, calibration:0,
+      ...r
+    }));
+  }catch(e){return []}
+}
+function saveRecords(){localStorage.setItem("lap_records",JSON.stringify(state.records))}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id!=='screen-login') document.getElementById('topbar').style.display='flex';
+  else document.getElementById('topbar').style.display='none';
+  if(id==='screen-dashboard'){
+    renderDashboard();
+    // Auto-pull from cloud on dashboard open (silent)
+    if(CLOUD_CONFIG.webhookUrl && CLOUD_CONFIG.secret){
+      pullRecordsFromCloud();
+    }
+  }
+  if(id==='screen-users') renderUsersTable();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function logout(){state.user=null;show('screen-login')}
+function toast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+/* ============================================================
+   ☁️ CLOUD SYNC (Google Sheets via Apps Script)
+   ----------------------------------------------------------
+   To enable centralized result collection from all devices:
+   1) Deploy the included google_apps_script.gs as a Web App
+      (Execute as: Me / Who has access: Anyone).
+   2) Paste the Web App URL into `webhookUrl` below.
+   3) Paste the same SECRET you used in the Apps Script into
+      `secret` below.
+   4) Commit & push to GitHub.
+   If webhookUrl is empty, the app falls back to localStorage
+   only (no cloud) — exactly like before.
+============================================================ */
+const CLOUD_CONFIG = {
+  webhookUrl: 'https://script.google.com/a/macros/cxpertz.com/s/AKfycbwDk5QeA3jJiAA8pIsF-9wglHsbGTNNIP5OR9tBY0jmAHqpbhPmUb9FUiTqUsuKeKRxPg/exec',
+  secret:     'lap_b9f2k7w3q1z8m5n4j6h2g0'
+};
+
+function pushRecordToCloud(record){
+  if(!CLOUD_CONFIG.webhookUrl || !CLOUD_CONFIG.secret) return;
+  try{
+    // Use text/plain body to avoid CORS pre-flight on Apps Script
+    fetch(CLOUD_CONFIG.webhookUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ secret: CLOUD_CONFIG.secret, record })
+    }).catch(err=>console.warn('Cloud sync failed:', err));
+  }catch(err){ console.warn('Cloud sync error:', err); }
+}
+
+async function pullRecordsFromCloud(){
+  if(!CLOUD_CONFIG.webhookUrl || !CLOUD_CONFIG.secret){
+    alert('لم يتم تهيئة الرابط السحابي. عدّل CLOUD_CONFIG في الكود.');
+    return;
+  }
+  try{
+    toast('جارٍ تحميل النتائج من Google Sheets...');
+    const url = CLOUD_CONFIG.webhookUrl + '?secret=' + encodeURIComponent(CLOUD_CONFIG.secret);
+    const res = await fetch(url, { method: 'GET' });
+    if(!res.ok){ alert('فشل الاتصال (HTTP ' + res.status + ')'); return; }
+    const data = await res.json();
+    if(!data.ok){ alert('فشل التحميل: ' + (data.error||'unknown')); return; }
+    const existing = new Set(state.records.map(r => r.id || (r.user+'__'+r.date)));
+    let added = 0;
+    (data.records||[]).forEach(r=>{
+      const k = r.id || (r.user+'__'+r.date);
+      if(!existing.has(k)){ state.records.push(r); existing.add(k); added++; }
+    });
+    saveRecords();
+    renderDashboard();
+    toast(`تم جلب ${added} سجل جديد (إجمالي: ${state.records.length})`);
+  }catch(err){
+    console.error(err);
+    alert('خطأ في التحميل: ' + err.message);
+  }
+}
+
+/* ============================================================
+   USER STORE (dynamic accounts, persisted in localStorage)
+============================================================ */
+const USERS_KEY = 'lap_users';
+const DEFAULT_USERS = [
+  { username:'admin',       password:'Admin@2026', role:'admin',   dept:'الموارد البشرية', name:'مسؤول النظام',   createdAt:'2026-01-01', active:true, seeded:true },
+  { username:'haalrasheed', password:'Hanadi123',  role:'manager', dept:'تحليل البيانات', name:'هنادي الرشيد',    createdAt:'2026-05-14', active:true, seeded:true },
+  { username:'smalfaufi',   password:'Samira123',  role:'manager', dept:'تحليل البيانات', name:'سميرة الفيفي',    createdAt:'2026-05-14', active:true, seeded:true },
+  { username:'sfalqahtani', password:'Sabah123',   role:'manager', dept:'تحليل البيانات', name:'صباح القحطاني',   createdAt:'2026-05-14', active:true, seeded:true },
+  { username:'hsaloufi',    password:'Haneen123',  role:'manager', dept:'تحليل البيانات', name:'حنين العوفي',     createdAt:'2026-05-14', active:true, seeded:true },
+  { username:'aanharbi',    password:'Alanoud123', role:'manager', dept:'تحليل البيانات', name:'العنود الحربي',   createdAt:'2026-05-14', active:true, seeded:true },
+  { username:'hmalhussein', password:'Hailah123',  role:'manager', dept:'تحليل البيانات', name:'هيلة الحسين',     createdAt:'2026-05-14', active:true, seeded:true },
+  { username:'Manager1',    password:'CX@2026cx',  role:'manager', dept:'تحليل البيانات', name:'الإداري CX',      createdAt:'2026-05-14', active:true, seeded:true }
+];
+
+/* Seed version — bump this whenever DEFAULT_USERS is changed so that
+   previously-seeded localStorage entries get refreshed automatically. */
+const SEED_VERSION = 2;
+const SEED_VERSION_KEY = 'lap_users_seed_v';
+
+function loadUsers(){
+  let list = [];
+  try{
+    const raw = JSON.parse(localStorage.getItem(USERS_KEY)||'null');
+    if(Array.isArray(raw) && raw.length){
+      list = raw.map(u=>({active:true, ...u}));
+    }
+  }catch(e){}
+  let changed = false;
+  const storedVer = parseInt(localStorage.getItem(SEED_VERSION_KEY)||'0',10);
+  if(list.length === 0){ list = [...DEFAULT_USERS]; changed = true; }
+  else {
+    // 1) Add any seeded users that are missing.
+    DEFAULT_USERS.forEach(d=>{
+      if(!list.find(u => (u.username||'').toLowerCase() === d.username.toLowerCase())){
+        list.push({...d});
+        changed = true;
+      }
+    });
+    // 2) If the source seed version is newer, refresh existing seeded entries
+    //    (keeps user-created accounts intact, only resets seeded ones).
+    if(storedVer < SEED_VERSION){
+      list = list.map(u=>{
+        if(!u.seeded) return u;
+        const d = DEFAULT_USERS.find(x=>x.username.toLowerCase()===String(u.username||'').toLowerCase());
+        return d ? {...u, ...d} : u;
+      });
+      changed = true;
+    }
+  }
+  if(changed){
+    localStorage.setItem(USERS_KEY, JSON.stringify(list));
+    localStorage.setItem(SEED_VERSION_KEY, String(SEED_VERSION));
+  }
+  return list;
+}
+function saveUsers(list){ localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
+function findUser(username){
+  const list = loadUsers();
+  return list.find(u=>u.username.toLowerCase() === String(username||'').toLowerCase().trim());
+}
+function upsertUser(user){
+  const list = loadUsers();
+  const i = list.findIndex(u=>u.username.toLowerCase()===user.username.toLowerCase());
+  if(i>=0){ list[i] = {...list[i], ...user}; } else { list.push(user); }
+  saveUsers(list);
+  return list;
+}
+function deleteUser(username){
+  const list = loadUsers().filter(u=>u.username.toLowerCase()!==String(username).toLowerCase());
+  saveUsers(list);
+  return list;
+}
+
+/* validation helpers */
+function validateUsername(u){
+  if(!u) return 'اسم المستخدم مطلوب';
+  if(u.length<3 || u.length>30) return 'اسم المستخدم يجب أن يكون بين ٣ و ٣٠ حرفًا';
+  if(!/^[a-zA-Z0-9._-]+$/.test(u)) return 'اسم المستخدم يقبل: حروف لاتينية وأرقام و(. _ -) فقط';
+  return null;
+}
+function validatePassword(p){
+  if(!p) return 'كلمة المرور مطلوبة';
+  if(p.length<8) return 'كلمة المرور يجب ألا تقل عن ٨ خانات';
+  if(!/[A-Za-z]/.test(p) || !/\d/.test(p)) return 'يجب أن تحتوي كلمة المرور على حرف ورقم على الأقل';
+  return null;
+}
+
+/* ============================================================
+   LOGIN
+============================================================ */
+function showLoginError(msg){
+  const el=document.getElementById('loginError');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 4500);
+}
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u){ showLoginError('أدخل اسم المستخدم'); return; }
+  if(!p){ showLoginError('أدخل كلمة المرور'); return; }
+
+  const acct = findUser(u);
+  if(!acct || acct.password !== p){
+    showLoginError('بيانات الدخول غير صحيحة.');
+    return;
+  }
+  if(acct.active === false){
+    showLoginError('هذا الحساب موقوف. تواصل مع مسؤول النظام.');
+    return;
+  }
+
+  // Lock role/dept to the authenticated account
+  state.user = { username:acct.username, dept:acct.dept, role:acct.role, name:acct.name };
+  document.getElementById('userChip').textContent = `${acct.name} • ${acct.dept}`;
+  if(acct.role==='admin'){ show('screen-dashboard'); return; }
+  show('screen-intro');
+}
+
+/* ============================================================
+   USER MANAGEMENT (admin only)
+============================================================ */
+let _editingUsername = null; // null => create mode
+
+function openUserManagement(){
+  if(!state.user || state.user.role!=='admin'){
+    toast('هذه الشاشة متاحة لمسؤول النظام فقط');
+    return;
+  }
+  resetUserForm();
+  show('screen-users');
+}
+
+function _ufError(msg){
+  const e=document.getElementById('userFormError');
+  const ok=document.getElementById('userFormOk');
+  ok.style.display='none';
+  e.textContent=msg; e.style.display='block';
+  setTimeout(()=>{ e.style.display='none'; }, 5000);
+}
+function _ufOk(msg){
+  const e=document.getElementById('userFormError');
+  const ok=document.getElementById('userFormOk');
+  e.style.display='none';
+  ok.textContent=msg; ok.style.display='block';
+  setTimeout(()=>{ ok.style.display='none'; }, 3500);
+}
+
+function resetUserForm(){
+  _editingUsername = null;
+  document.getElementById('userFormTitle').textContent = 'إنشاء مستخدم جديد';
+  document.getElementById('uf_username').value = '';
+  document.getElementById('uf_username').disabled = false;
+  document.getElementById('uf_name').value = '';
+  document.getElementById('uf_pass').value = '';
+  document.getElementById('uf_pass2').value = '';
+  document.getElementById('uf_pass').placeholder = '٨ خانات على الأقل';
+  document.getElementById('uf_pass2').placeholder = 'أعد إدخالها';
+  document.getElementById('uf_dept').selectedIndex = 0;
+  document.getElementById('uf_role').value = 'staff';
+  document.getElementById('uf_active').checked = true;
+}
+
+function fillUserForm(username){
+  const u = findUser(username);
+  if(!u) return;
+  _editingUsername = u.username;
+  document.getElementById('userFormTitle').textContent = `تعديل المستخدم: ${u.username}`;
+  document.getElementById('uf_username').value = u.username;
+  document.getElementById('uf_username').disabled = true;
+  document.getElementById('uf_name').value = u.name || '';
+  document.getElementById('uf_dept').value = u.dept || 'التشغيل';
+  document.getElementById('uf_role').value = u.role || 'staff';
+  document.getElementById('uf_active').checked = u.active !== false;
+  document.getElementById('uf_pass').value = '';
+  document.getElementById('uf_pass2').value = '';
+  document.getElementById('uf_pass').placeholder = 'اتركها فارغة للإبقاء على الحالية';
+  document.getElementById('uf_pass2').placeholder = 'اتركها فارغة للإبقاء على الحالية';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function submitUserForm(){
+  const username = document.getElementById('uf_username').value.trim();
+  const name = document.getElementById('uf_name').value.trim();
+  const dept = document.getElementById('uf_dept').value;
+  const role = document.getElementById('uf_role').value;
+  const p1 = document.getElementById('uf_pass').value;
+  const p2 = document.getElementById('uf_pass2').value;
+  const active = document.getElementById('uf_active').checked;
+
+  // Username validation (only required on create)
+  if(_editingUsername === null){
+    const ue = validateUsername(username);
+    if(ue){ _ufError(ue); return; }
+    if(findUser(username)){ _ufError('اسم المستخدم مستخدم مسبقًا. اختر اسمًا آخر.'); return; }
+  }
+  if(!name){ _ufError('الاسم الكامل مطلوب'); return; }
+
+  // Password: required for create, optional for edit
+  if(_editingUsername === null || p1 || p2){
+    const pe = validatePassword(p1);
+    if(pe){ _ufError(pe); return; }
+    if(p1 !== p2){ _ufError('كلمتا المرور غير متطابقتين'); return; }
+  }
+
+  if(_editingUsername === null){
+    // CREATE
+    const newUser = {
+      username, password:p1, name, dept, role, active,
+      createdAt: new Date().toISOString().slice(0,10),
+      seeded:false
+    };
+    upsertUser(newUser);
+    _ufOk(`تم إنشاء الحساب «${username}» بنجاح`);
+    toast('تم إنشاء المستخدم');
+  } else {
+    // UPDATE
+    const existing = findUser(_editingUsername);
+    if(!existing){ _ufError('تعذّر العثور على المستخدم'); return; }
+    const updated = {
+      ...existing,
+      name, dept, role, active,
+      ...(p1 ? { password:p1 } : {})
+    };
+    upsertUser(updated);
+    _ufOk(`تم تحديث بيانات «${existing.username}»`);
+    toast('تم حفظ التعديلات');
+  }
+  resetUserForm();
+  renderUsersTable();
+}
+
+function editUser(username){ fillUserForm(username); }
+
+function removeUser(username){
+  const u = findUser(username);
+  if(!u) return;
+  if(state.user && state.user.username === username){
+    _ufError('لا يمكن حذف الحساب الذي تستخدمه حاليًا'); return;
+  }
+  // Keep at least one admin
+  const list = loadUsers();
+  const remainingAdmins = list.filter(x=>x.role==='admin' && x.username!==username && x.active!==false);
+  if(u.role==='admin' && remainingAdmins.length===0){
+    _ufError('لا يمكن حذف آخر حساب مسؤول نظام نشط'); return;
+  }
+  if(!confirm(`هل أنت متأكد من حذف الحساب «${username}»؟ لا يمكن التراجع.`)) return;
+  deleteUser(username);
+  _ufOk(`تم حذف «${username}»`);
+  if(_editingUsername === username) resetUserForm();
+  renderUsersTable();
+}
+
+function toggleUserActive(username){
+  const u = findUser(username);
+  if(!u) return;
+  if(state.user && state.user.username === username && u.active!==false){
+    _ufError('لا يمكن إيقاف الحساب الذي تستخدمه حاليًا'); return;
+  }
+  upsertUser({...u, active: u.active===false ? true : false});
+  renderUsersTable();
+}
+
+function generatePassword(){
+  const lower = 'abcdefghjkmnpqrstuvwxyz';
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const digits= '23456789';
+  const sym   = '@#$%!?';
+  const all = lower+upper+digits+sym;
+  let p = '';
+  p += upper[Math.floor(Math.random()*upper.length)];
+  p += lower[Math.floor(Math.random()*lower.length)];
+  p += digits[Math.floor(Math.random()*digits.length)];
+  p += sym[Math.floor(Math.random()*sym.length)];
+  for(let i=0;i<8;i++) p += all[Math.floor(Math.random()*all.length)];
+  // shuffle
+  p = p.split('').sort(()=>Math.random()-0.5).join('');
+  document.getElementById('uf_pass').value = p;
+  document.getElementById('uf_pass2').value = p;
+  document.getElementById('uf_pass').type = 'text';
+  setTimeout(()=>{ document.getElementById('uf_pass').type = 'password'; }, 4000);
+  _ufOk('تم توليد كلمة مرور قوية — انسخها قبل الحفظ');
+}
+
+const ROLE_LABELS = { admin:'مسؤول النظام', manager:'إداري', supervisor:'مشرف', staff:'موظف تشغيل' };
+
+function renderUsersTable(){
+  const body = document.getElementById('usersTableBody');
+  if(!body) return;
+  const q = (document.getElementById('userSearch')?.value || '').trim().toLowerCase();
+  const all = loadUsers();
+  const list = q ? all.filter(u=>
+    (u.username||'').toLowerCase().includes(q) ||
+    (u.name||'').toLowerCase().includes(q) ||
+    (u.dept||'').toLowerCase().includes(q) ||
+    (u.role||'').toLowerCase().includes(q)
+  ) : all;
+
+  document.getElementById('userListMeta').textContent =
+    `${toAr ? toAr(list.length) : list.length} من ${toAr ? toAr(all.length) : all.length} مستخدمين`;
+
+  if(list.length === 0){
+    body.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#6b7a90;padding:20px">لا توجد نتائج مطابقة.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = list.map(u=>{
+    const roleLbl = ROLE_LABELS[u.role] || u.role;
+    const status = u.active===false
+      ? `<span class="lvl-DR" style="padding:3px 8px;border-radius:8px;font-size:12px">موقوف</span>`
+      : `<span class="lvl-HLP" style="padding:3px 8px;border-radius:8px;font-size:12px">نشط</span>`;
+    const seededTag = u.seeded ? `<span style="font-size:11px;color:#6b7a90;margin-inline-start:6px">(تجريبي)</span>` : '';
+    return `
+      <tr>
+        <td><code style="background:#eef3fb;padding:2px 6px;border-radius:6px">${u.username}</code>${seededTag}</td>
+        <td>${u.name||'—'}</td>
+        <td>${u.dept||'—'}</td>
+        <td>${roleLbl}</td>
+        <td>${status}</td>
+        <td>${u.createdAt||'—'}</td>
+        <td>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="editUser('${u.username}')">تعديل</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="toggleUserActive('${u.username}')">${u.active===false?'تفعيل':'إيقاف'}</button>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;color:#b91c1c;border-color:rgba(185,28,28,.35)" onclick="removeUser('${u.username}')">حذف</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* ============================================================
+   PRELIMINARY
+============================================================ */
+let preIdx=0;
+function startPreliminary(){
+  if(!document.getElementById('agree').checked){alert('يجب الموافقة على الإقرار للمتابعة');return}
+  preIdx=0;state.preAnswers={};
+  show('screen-pre');
+  renderPre();
+}
+function renderPre(){
+  const total=PRE_QUESTIONS.length;
+  const q=PRE_QUESTIONS[preIdx];
+  document.getElementById('preCounter').textContent = `${toAr(preIdx+1)} / ${toAr(total)}`;
+  const pct=Math.round((preIdx/total)*100);
+  document.getElementById('preBar').style.width = pct+'%';
+  document.getElementById('preMeta').textContent = pct+'٪';
+  const host=document.getElementById('preCard');
+  host.innerHTML = `
+    <div class="q-card">
+      <div class="q-meta"><span class="tag">سؤال تمهيدي</span></div>
+      <div class="q-stem">${q.q}</div>
+      <div class="options">
+        ${q.opts.map(o=>`<div class="opt" data-v="${o}"><div class="dot">●</div><div class="txt">${o}</div></div>`).join('')}
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-ghost" ${preIdx===0?'disabled':''} onclick="prevPre()">السابق</button>
+        <button class="btn btn-primary" id="preNext" disabled onclick="nextPre()">${preIdx===total-1?'بدء الاختبار':'التالي'}</button>
+      </div>
+    </div>`;
+  host.querySelectorAll('.opt').forEach(el=>{
+    el.addEventListener('click',()=>{
+      host.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('preNext').disabled=false;
+      state.preAnswers[q.id]=el.dataset.v;
+    });
+  });
+  if(state.preAnswers[q.id]){
+    const sel=host.querySelector(`.opt[data-v="${state.preAnswers[q.id]}"]`);
+    if(sel){sel.classList.add('selected');document.getElementById('preNext').disabled=false}
+  }
+}
+function prevPre(){if(preIdx>0){preIdx--;renderPre()}}
+function nextPre(){
+  if(preIdx<PRE_QUESTIONS.length-1){preIdx++;renderPre()}
+  else {buildAdaptiveQueue();show('screen-test');renderQ();toast('بدأ الاختبار التكيفي — حظًا موفقًا!')}
+}
+
+/* ============================================================
+   ADAPTIVE TEST LOGIC
+============================================================ */
+function buildAdaptiveQueue(){
+  /* ============================================================
+     4-STAGE STRUCTURE — guarantees 25+ questions per participant
+     Stage 2: Core Assessment (18 questions, C1-heavy)
+     Stage 3: Challenge (3-10 — adaptive insertions + dedicated)
+     Stage 4: Final Validation (4 high-difficulty L3 anchors)
+     Total: 25–32 questions
+  ============================================================ */
+  const queue = [];
+  const used = new Set();
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+  function pickFromBank(c,lvl,excludeType){
+    const exact = BANK.filter(q=>q.c===c && q.lvl===lvl && !used.has(q.id) && q.type!==excludeType);
+    let pool = exact.length ? exact : BANK.filter(q=>q.c===c && q.lvl===lvl && !used.has(q.id));
+    if(!pool.length) pool = BANK.filter(q=>q.c===c && !used.has(q.id));
+    if(!pool.length) return Object.assign(generateAdaptive(c,lvl,Math.floor(Math.random()*9999)),{_stage:'core'});
+    const q = pool[Math.floor(Math.random()*pool.length)];
+    used.add(q.id);
+    return JSON.parse(JSON.stringify(q));
+  }
+
+  // ----- Stage 2: Core Assessment (18 questions) -----
+  // C1 heavy (5 questions), C5 = 3, others = 2, C8 = 1 → total 19 → trim to 18 by lowering one to single
+  // Final distribution: C1=5, C2=2, C3=2, C4=2, C5=2, C6=2, C7=2, C8=1 = 18
+  const distribution = {
+    C1:[1,1,2,2,3], C2:[1,2], C3:[1,2], C4:[1,2],
+    C5:[1,2], C6:[1,2], C7:[1,2], C8:[1]
+  };
+  const coreBatch = [];
+  Object.entries(distribution).forEach(([c,levels])=>{
+    levels.forEach(lvl=>{
+      const q = pickFromBank(c,lvl);
+      q._stage = 'core';
+      coreBatch.push(q);
+    });
+  });
+  // Interleave so the participant doesn't see all C1 in a row.
+  // Group by level then shuffle within levels for unpredictability.
+  const byLvl = {1:[],2:[],3:[]};
+  coreBatch.forEach(q=>byLvl[q.lvl].push(q));
+  Object.values(byLvl).forEach(shuffle);
+  // Assemble: alternate L1 and L2, then L3 toward end of core
+  const interleaved = [];
+  const l1 = byLvl[1], l2 = byLvl[2], l3 = byLvl[3];
+  let i1=0,i2=0;
+  while(i1<l1.length || i2<l2.length){
+    if(i1<l1.length) interleaved.push(l1[i1++]);
+    if(i2<l2.length) interleaved.push(l2[i2++]);
+  }
+  interleaved.push(...l3);
+  queue.push(...interleaved);
+
+  // ----- Stage 3: Dedicated Challenge anchors (3 hard questions, will be reached after core) -----
+  // Even without adaptive insertions, the participant always gets these 3 challenge questions.
+  const challengeAnchors = [];
+  ['C1','C5','C3'].forEach(c=>{
+    const q = pickFromBank(c, 3) || pickFromBank(c, 2);
+    if(q){
+      q._stage = 'challenge';
+      q._anchor = true;
+      challengeAnchors.push(q);
+    }
+  });
+  queue.push(...challengeAnchors);
+
+  // ----- Stage 4: Final Validation (4 L3 anchors in critical competencies) -----
+  const validationComps = ['C1','C3','C5','C4'];
+  validationComps.forEach(c=>{
+    const q = pickFromBank(c, 3) || pickFromBank(c, 2);
+    if(q){
+      q._stage = 'validation';
+      q._anchor = true;
+      queue.push(q);
+    }
+  });
+
+  state.testQueue = queue;
+  state.testIdx = 0;
+  state.answers = {};
+  state.competencyScores = {};
+  state.knowledgeStates = {};
+  state.confidencePattern = [];
+  state.consistency = [];
+  state.badges = [];
+  state.consecutiveMastered = 0;
+  state.consecutiveAnalysis = 0;
+  state.difficultyRaisedAt = [];
+  state.maxChallengeLevel = 0;
+  state.pairAnswers = {};
+  state.stageStats = {
+    core:      {seen:0,passed:0,total:queue.filter(q=>q._stage==='core').length},
+    challenge: {seen:0,passed:0,total:queue.filter(q=>q._stage==='challenge').length},
+    validation:{seen:0,passed:0,total:queue.filter(q=>q._stage==='validation').length}
+  };
+  state.sessionStart = Date.now();
+  Object.keys(COMPETENCIES).forEach(c=>{
+    state.competencyScores[c]={sum:0,n:0,maxLvl:0,perfect:0,weak:0};
+    state.knowledgeStates[c]={mastered:0,unconscious:0,misinformed:0,doubt:0,recent:[],levelsMastered:new Set()};
+  });
+}
+
+/* ============================================================
+   ADAPTIVE LOOP
+   - Knowledge State per competency (إتقان حقيقي / كفاءة غير واعية / ثقة زائفة / طور التعلم)
+   - Pattern Analysis across answers (not single-answer driven)
+   - Confidence-aware adaptation
+============================================================ */
+function classifyLearnerState(scoreNorm, confidence){
+  const correct = scoreNorm >= 0.7;
+  const partial = scoreNorm >= 0.5 && scoreNorm < 0.7;
+  const highConf = confidence === 'very_confident' || confidence === 'confident';
+  if(correct && highConf) return 'mastered';
+  if(correct && !highConf) return 'unconscious';
+  if(!correct && highConf) return 'misinformed';     // false confidence — dangerous
+  if(partial && highConf) return 'misinformed';      // also a calibration issue
+  return 'doubt';                                     // wrong + low confidence (or partial + low)
+}
+
+function pickQuestionFor(c,lvl,exclude){
+  const pool = BANK.filter(q=>q.c===c && q.lvl===lvl && !state.answers[q.id] && q.id!==exclude);
+  if(pool.length) return JSON.parse(JSON.stringify(pool[Math.floor(Math.random()*pool.length)]));
+  return generateAdaptive(c, lvl, Math.floor(Math.random()*9999));
+}
+function pickComplexScenario(c){
+  const pool = BANK.filter(q=>q.c===c && (q.type==='scenario' || q.lvl===3) && !state.answers[q.id]);
+  if(pool.length) return JSON.parse(JSON.stringify(pool[Math.floor(Math.random()*pool.length)]));
+  return generateAdaptive(c, 3, Math.floor(Math.random()*9999));
+}
+
+function adaptAfterAnswer(q,scoreNorm,confidence){
+  const c = q.c;
+  const ks = state.knowledgeStates[c];
+  const learnerState = classifyLearnerState(scoreNorm, confidence);
+  ks[learnerState]++;
+  ks.recent.push({lvl:q.lvl, state:learnerState, scoreNorm});
+  if(ks.recent.length>5) ks.recent.shift();
+
+  state.confidencePattern.push({
+    c, lvl:q.lvl, scoreNorm, confidence,
+    correct: scoreNorm>=0.7, learnerState,
+    qid:q.id, t:Date.now()
+  });
+
+  // -------- Pattern Analysis (looks at last 2-3 in same competency) --------
+  const recentInComp = state.confidencePattern.filter(p=>p.c===c).slice(-3);
+  const oscillating = (() => {
+    if(recentInComp.length<3) return false;
+    const scores = recentInComp.map(p=>p.scoreNorm);
+    return (Math.max(...scores)-Math.min(...scores))>0.45;
+  })();
+  const repeatedMisinformed = recentInComp.filter(p=>p.learnerState==='misinformed').length>=2;
+  const repeatedUnconscious = recentInComp.filter(p=>p.learnerState==='unconscious').length>=2;
+
+  // -------- Adaptive Loop --------
+  // All adaptive insertions are tagged as 'challenge' stage and logged.
+  function logDifficultyRaised(reason, fromLvl, toLvl){
+    state.difficultyRaisedAt.push({
+      idx: state.testIdx,
+      c, fromLvl, toLvl, reason
+    });
+  }
+
+  // 1) إجابة قوية + ثقة عالية → سؤال أصعب
+  if(learnerState==='mastered'){
+    if(q.lvl<3){
+      const harder = pickQuestionFor(c, q.lvl+1, q.id);
+      harder._stage = 'challenge';
+      harder._meta = 'raised-difficulty';
+      harder._announce = `تم رفع مستوى التحدي في «${COMPETENCIES[c].full}» بناءً على أدائك`;
+      insertAfterCurrent(harder);
+      logDifficultyRaised('mastered+confident', q.lvl, q.lvl+1);
+      ks.levelsMastered.add(q.lvl);
+      if(q.lvl+1>state.competencyScores[c].maxLvl) state.competencyScores[c].maxLvl = q.lvl+1;
+      if(q.lvl+1>state.maxChallengeLevel) state.maxChallengeLevel = q.lvl+1;
+    } else {
+      ks.levelsMastered.add(3);
+      if(state.maxChallengeLevel<3) state.maxChallengeLevel=3;
+    }
+    return;
+  }
+
+  // 2) إجابة صحيحة + ثقة منخفضة → سؤال تحقق
+  if(learnerState==='unconscious'){
+    const validation = pickQuestionFor(c, q.lvl, q.id);
+    validation.stem = "🔍 [سؤال تحقق] " + validation.stem;
+    validation._meta = 'validation';
+    validation._stage = 'challenge';
+    validation._announce = "هذا السؤال يقيس دقة قرارك ويتحقق من صحة إجابتك السابقة";
+    insertAfterCurrent(validation);
+    if(repeatedUnconscious){
+      const probe = pickQuestionFor(c, Math.min(3,q.lvl+1), q.id);
+      probe.stem = "🎯 [اختبار تأكيد] " + probe.stem;
+      probe._meta = 'confirmation';
+      probe._stage = 'challenge';
+      probe._announce = "تم رفع مستوى التحدي للتأكد من إتقانك الحقيقي";
+      insertAfterCurrent(probe);
+      logDifficultyRaised('repeated-unconscious', q.lvl, q.lvl+1);
+    }
+    return;
+  }
+
+  // 3) إجابة خاطئة + ثقة عالية → اختبار فهم عميق
+  if(learnerState==='misinformed'){
+    const easier = pickQuestionFor(c, Math.max(1,q.lvl-1), q.id);
+    easier.stem = "🧭 [سؤال تشخيصي] " + easier.stem;
+    easier._meta = 'diagnostic';
+    easier._stage = 'challenge';
+    easier._announce = "هذا السؤال يقيس فهمك الأساسي للمحور";
+    insertAfterCurrent(easier);
+    if(repeatedMisinformed){
+      const probe = pickQuestionFor(c, q.lvl, q.id);
+      probe.stem = "⚠️ [سؤال فهم عميق] " + probe.stem;
+      probe._meta = 'deep-understanding';
+      probe._stage = 'challenge';
+      probe._announce = "هذا السؤال يقيس الحكم المهني تحت سياق مختلف";
+      insertAfterCurrent(probe);
+    }
+    return;
+  }
+
+  // 4) إجابة متذبذبة → سيناريو معقد
+  if(learnerState==='doubt' || oscillating){
+    if(oscillating){
+      const complex = pickComplexScenario(c);
+      complex.stem = "🧩 [سيناريو متقدم] " + complex.stem;
+      complex._meta = 'pattern-stabilizer';
+      complex._stage = 'challenge';
+      complex._announce = "تم إدخال سيناريو معقّد لتثبيت قراءة أدائك";
+      insertAfterCurrent(complex);
+      logDifficultyRaised('oscillation', q.lvl, complex.lvl);
+      if(complex.lvl>state.maxChallengeLevel) state.maxChallengeLevel=complex.lvl;
+    } else {
+      const reanchor = pickQuestionFor(c, q.lvl, q.id);
+      reanchor.stem = "🔁 [سؤال إعادة تأطير] " + reanchor.stem;
+      reanchor._meta = 'reanchor';
+      reanchor._stage = 'challenge';
+      reanchor._announce = "نُعيد تأطير المحور بزاوية مختلفة";
+      insertAfterCurrent(reanchor);
+    }
+    return;
+  }
+}
+
+function insertAfterCurrent(q){
+  // total cap 35 (core 18 + challenge anchors 3 + validation 4 = 25 base; up to 10 adaptive)
+  if(state.testQueue.length>=35) return;
+  // avoid duplicate within remaining queue
+  if(state.testQueue.slice(state.testIdx+1).some(x=>x.id===q.id)) return;
+  // insert before validation block so adaptive questions remain in challenge stage
+  const remaining = state.testQueue.slice(state.testIdx+1);
+  const firstValidationIdx = remaining.findIndex(x=>x._stage==='validation');
+  const insertAt = firstValidationIdx===-1
+    ? state.testIdx + 1 + remaining.length
+    : state.testIdx + 1 + firstValidationIdx;
+  state.testQueue.splice(insertAt, 0, q);
+  // update stage totals
+  if(q._stage==='challenge') state.stageStats.challenge.total++;
+}
+
+/* ============================================================
+   QUESTION RENDERING
+============================================================ */
+function renderQ(){
+  const q=state.testQueue[state.testIdx];
+  const total=state.testQueue.length;
+  state.questionStartTime = Date.now();
+
+  document.getElementById('qCounter').textContent = `${toAr(state.testIdx+1)} / ${toAr(total)}`;
+  const pct=Math.round((state.testIdx/total)*100);
+  document.getElementById('qBar').style.width = pct+'%';
+  document.getElementById('qMeta').textContent = pct+'٪';
+  document.getElementById('competencyTag').textContent = COMPETENCIES[q.c].full;
+  document.getElementById('competencyTag').style.background = "#EEF2FF";
+  const lvlEl=document.getElementById('levelTag');
+  lvlEl.textContent = q.lvl===1?"مستوى أساسي":q.lvl===2?"مستوى متوسط":"مستوى متقدم";
+  lvlEl.className = "tag lvl"+q.lvl;
+
+  // Stage UI
+  updateStageStepper(q._stage||'core');
+  document.getElementById('stageTag').textContent = "المرحلة: " + STAGES[q._stage||'core'].ar;
+  renderBadges();
+  updateTier();
+
+  const host=document.getElementById('qHost');
+  let body="";
+  if(q.type==='mcq' || q.type==='scenario' || q.type==='timed' || q.type==='firstAction' || q.type==='consistency'){
+    body = mcqHtml(q);
+  } else if(q.type==='bestworst'){
+    body = bestworstHtml(q);
+  } else if(q.type==='ranking'){
+    body = rankingHtml(q);
+  }
+
+  // Compose announce + smart feedback
+  const announce = q._announce ? `<div class="challenge-banner ${announceClass(q._meta)}"><span class="ico">${announceIcon(q._meta)}</span><div>${q._announce}</div></div>` : '';
+  const fb = smartFeedback(q);
+  const smartFb = fb ? `<div class="smart-fb"><span class="ico">ⓘ</span>${fb}</div>` : '';
+  const timerBlock = q.timer ? `
+    <div class="timer-bar" id="timerBar">
+      <span>سؤال موقّت — اتخذ قرارك تحت الضغط</span>
+      <span style="flex:1"></span>
+      <span class="countdown" id="countdown">${q.timer}</span>
+    </div>` : '';
+
+  host.innerHTML = `
+    ${announce}
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="tag">${typeLabel(q.type)}</span>
+        <span class="tag lvl${q.lvl}">${q.lvl===1?'أساسي':q.lvl===2?'متوسط':'متقدم'}</span>
+        <span class="tag" style="background:#F1F5F9;color:#334155">${COMPETENCIES[q.c].ar}</span>
+        ${q._meta?`<span class="tag" style="background:#FFF7ED;color:#9A3412">${metaLabel(q._meta)}</span>`:''}
+        ${q._anchor?`<span class="tag" style="background:#FCE7F3;color:#9D174D">سؤال محوري</span>`:''}
+      </div>
+      ${timerBlock}
+      ${smartFb}
+      ${q.context?`<div class="q-context">${q.context}</div>`:''}
+      <div class="q-stem">${q.stem}</div>
+      ${body}
+      <div class="confidence-section">
+        <div class="conf-label"><span class="pulse"></span>ما مستوى ثقتك بإجابتك؟ <span style="color:#94A3B8;font-weight:400;font-size:12px">(يُستخدم لقياس النضج الحقيقي مقابل الثقة الزائفة)</span></div>
+        <div class="confidence-bar" id="confBar">
+          <button class="conf-btn" data-c="very_confident"><span class="ico">★</span>واثق جدًا</button>
+          <button class="conf-btn" data-c="confident"><span class="ico">●</span>واثق</button>
+          <button class="conf-btn" data-c="unsure"><span class="ico">?</span>غير متأكد</button>
+        </div>
+      </div>
+      <div class="nav-row">
+        <span class="muted" style="font-size:12px">المتبقي: ${toAr(total-state.testIdx-1)} سؤال</span>
+        <button class="btn btn-primary" id="qNext" disabled onclick="submitQ()">${state.testIdx===total-1?'إنهاء وعرض النتيجة':'التالي'}</button>
+      </div>
+    </div>
+  `;
+  bindInteractions(q);
+  bindConfidence();
+  if(q.timer) startTimer(q.timer);
+}
+
+function announceClass(meta){
+  if(meta==='diagnostic'||meta==='deep-understanding') return 'diagnostic';
+  if(meta==='validation'||meta==='confirmation') return 'info';
+  return '';
+}
+function announceIcon(meta){
+  return {
+    'raised-difficulty':'⚡',
+    'validation':'🔍',
+    'confirmation':'🎯',
+    'diagnostic':'🧭',
+    'deep-understanding':'⚠️',
+    'pattern-stabilizer':'🧩',
+    'reanchor':'🔁'
+  }[meta] || '✨';
+}
+
+function smartFeedback(q){
+  if(q._meta) return null; // announce already covers it
+  const idx = state.testIdx;
+  // Vary contextual hints without revealing answer
+  const pool = {
+    core: [
+      "هذا السؤال يقيس الحكم المهني — ركّز على الأثر بعيد المدى.",
+      "راجع قرارك بعناية، الفروق دقيقة بين الخيارات.",
+      "كل الخيارات معقولة — الفرق في جودة الحكم.",
+      "فكّر في السياق التشغيلي قبل اتخاذ القرار."
+    ],
+    challenge: [
+      "أنت في مرحلة التحدي — هذا السؤال لقياس دقة اتخاذ القرار.",
+      "هذا الموقف يكشف الجاهزية القيادية الحقيقية.",
+      "تذكّر أن السرعة ليست بديلًا عن الجودة."
+    ],
+    validation: [
+      "مرحلة التحقق النهائي — أنت أمام موقف قيادي محوري.",
+      "هذا السؤال محوري في تحديد جاهزيتك القيادية.",
+      "تعامل مع هذا السؤال كما لو كنت في الدور القيادي فعلًا."
+    ]
+  };
+  if(q.type==='timed') return "🕒 سؤال تحت الضغط — يُسجَّل زمن استجابتك.";
+  if(q.type==='firstAction') return "ركّز على ما ستفعله أولًا — الترتيب يهم.";
+  if(q.type==='consistency') return "هذا السؤال مرتبط بسؤال سابق ليُقيس اتساق سلوكك.";
+  const stagePool = pool[q._stage||'core'] || pool.core;
+  return stagePool[idx % stagePool.length];
+}
+
+let _timerHandle = null;
+function startTimer(seconds){
+  let remaining = seconds;
+  const cd = document.getElementById('countdown');
+  const bar = document.getElementById('timerBar');
+  if(_timerHandle) clearInterval(_timerHandle);
+  _timerHandle = setInterval(()=>{
+    remaining--;
+    if(cd) cd.textContent = remaining;
+    if(remaining<=10 && bar) bar.classList.add('urgent');
+    if(remaining<=0){
+      clearInterval(_timerHandle);
+      _timerHandle = null;
+      // visual flash, no auto-submit (we record overTime in submitQ)
+      if(bar) bar.innerHTML = '<span style="color:#7F1D1D;font-weight:700">⏰ انتهى الوقت — اضغط «التالي» لتأكيد إجابتك (سيُسجَّل الزمن)</span>';
+    }
+  },1000);
+}
+
+function updateStageStepper(currentStage){
+  const order = ['onboarding','core','challenge','validation'];
+  const cIdx = order.indexOf(currentStage);
+  document.querySelectorAll('#stageStepper .step').forEach(el=>{
+    const st = el.dataset.stage;
+    const i = order.indexOf(st);
+    el.classList.remove('active','done');
+    if(i<cIdx) el.classList.add('done');
+    else if(i===cIdx) el.classList.add('active');
+  });
+  // update meta
+  const seen = (s)=>state.stageStats[s]?state.stageStats[s].seen:0;
+  const total = (s)=>state.stageStats[s]?state.stageStats[s].total:0;
+  const m = (id,s)=>{const e=document.getElementById(id); if(e) e.textContent = total(s)>0?`${toAr(seen(s))}/${toAr(total(s))}`:'—';};
+  m('coreMeta','core'); m('chalMeta','challenge'); m('valMeta','validation');
+}
+
+function renderBadges(){
+  const bar = document.getElementById('badgesBar');
+  if(!bar) return;
+  if(state.badges.length===0){
+    bar.innerHTML = `<span class="muted" style="font-size:12px">الشارات تُفتح بناءً على نمط أدائك...</span>`;
+    return;
+  }
+  bar.innerHTML = state.badges.map(id=>{
+    const b = BADGES_DEF[id];
+    return `<span class="badge-earned" title="${b.desc}"><span class="icon">${b.icon}</span>${b.name}</span>`;
+  }).join('');
+}
+
+function updateTier(){
+  const el = document.getElementById('tierPill');
+  if(!el) return;
+  // determine tier from average normalized score so far
+  const norms = Object.values(state.answers).map(a=>a.norm);
+  if(norms.length===0){el.textContent="مستوى الأداء: في البداية"; el.className="tier-pill tier-good"; return}
+  const avg = norms.reduce((a,b)=>a+b,0)/norms.length;
+  let tier='good', label='جيد', cls='tier-good';
+  if(avg>=0.8){tier='leadership';label='قيادي';cls='tier-leadership'}
+  else if(avg>=0.6){tier='advanced';label='متقدم';cls='tier-advanced'}
+  el.textContent = `مستوى الأداء: ${label}`;
+  el.className = `tier-pill ${cls}`;
+}
+function metaLabel(m){
+  return {
+    'validation':"تحقق",
+    'confirmation':"تأكيد",
+    'diagnostic':"تشخيصي",
+    'deep-understanding':"فهم عميق",
+    'pattern-stabilizer':"تثبيت نمط",
+    'reanchor':"إعادة تأطير"
+  }[m]||"تكيفي";
+}
+function typeLabel(t){return {
+  mcq:"اختيار من متعدد",
+  scenario:"تحليل حالة",
+  bestworst:"أفضل وأسوأ تصرف",
+  ranking:"ترتيب أولويات",
+  timed:"قرار تحت الضغط",
+  firstAction:"ماذا ستفعل أولًا؟",
+  consistency:"اتساق سلوكي"
+}[t]||"سؤال"}
+function mcqHtml(q){
+  return `<div class="options" id="optHost">
+    ${q.opts.map((o,i)=>`<div class="opt" data-i="${i}"><div class="dot">${toAr(i+1)}</div><div class="txt">${o.t}</div></div>`).join('')}
+  </div>`;
+}
+function bestworstHtml(q){
+  return `
+    <div class="bw-grid">
+      <div class="bw-box" id="bestBox">
+        <h5>أفضل تصرف</h5>
+        ${q.opts.map((o,i)=>`<div class="bw-opt" data-i="${i}">${o.t}</div>`).join('')}
+      </div>
+      <div class="bw-box" id="worstBox">
+        <h5>أسوأ تصرف</h5>
+        ${q.opts.map((o,i)=>`<div class="bw-opt" data-i="${i}">${o.t}</div>`).join('')}
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px">اختر تصرفًا واحدًا في كل عمود (يجب اختلاف الاختيارين).</div>
+  `;
+}
+function rankingHtml(q){
+  return `
+    <div class="rank-list" id="rankList">
+      ${q.opts.map((o,i)=>`
+        <div class="rank-item" draggable="true" data-i="${i}">
+          <div class="num">${toAr(i+1)}</div>
+          <div style="flex:1">${o.t}</div>
+          <div class="rank-actions">
+            <button type="button" class="rank-btn rank-up"   aria-label="رفع للأعلى">▲</button>
+            <button type="button" class="rank-btn rank-down" aria-label="إنزال للأسفل">▼</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="hint" style="margin-top:10px">استخدم الأسهم ▲ ▼ لإعادة الترتيب من الأكثر إلى الأقل أهمية. (يمكن أيضًا السحب والإفلات على الحاسوب)</div>
+  `;
+}
+
+let pendingAnswer=null;
+let pendingConfidence=null;
+function checkReady(){
+  document.getElementById('qNext').disabled = !(pendingAnswer && pendingConfidence);
+}
+function bindConfidence(){
+  document.querySelectorAll('#confBar .conf-btn').forEach(el=>{
+    el.addEventListener('click',()=>{
+      document.querySelectorAll('#confBar .conf-btn').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+      pendingConfidence = el.dataset.c;
+      checkReady();
+    });
+  });
+}
+function bindInteractions(q){
+  pendingAnswer=null;
+  pendingConfidence=null;
+  const mcqLike = ['mcq','scenario','timed','firstAction','consistency'];
+  if(mcqLike.includes(q.type)){
+    document.querySelectorAll('#optHost .opt').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.querySelectorAll('#optHost .opt').forEach(x=>x.classList.remove('selected'));
+        el.classList.add('selected');
+        pendingAnswer={type:q.type,i:+el.dataset.i};
+        checkReady();
+      });
+    });
+  } else if(q.type==='bestworst'){
+    let best=null,worst=null;
+    document.querySelectorAll('#bestBox .bw-opt').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.querySelectorAll('#bestBox .bw-opt').forEach(x=>x.classList.remove('best'));
+        el.classList.add('best');best=+el.dataset.i;check();
+      });
+    });
+    document.querySelectorAll('#worstBox .bw-opt').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.querySelectorAll('#worstBox .bw-opt').forEach(x=>x.classList.remove('worst'));
+        el.classList.add('worst');worst=+el.dataset.i;check();
+      });
+    });
+    function check(){
+      if(best!==null && worst!==null && best!==worst){
+        pendingAnswer={type:'bestworst',best,worst};
+      } else {
+        pendingAnswer=null;
+      }
+      checkReady();
+    }
+  } else if(q.type==='ranking'){
+    const list=document.getElementById('rankList');
+    let dragging=null;
+
+    function updateNums(){
+      const items = list.querySelectorAll('.rank-item');
+      items.forEach((el,i)=>{
+        el.querySelector('.num').textContent=toAr(i+1);
+        const up = el.querySelector('.rank-up');
+        const down = el.querySelector('.rank-down');
+        if(up)   up.disabled   = (i===0);
+        if(down) down.disabled = (i===items.length-1);
+      });
+    }
+    function captureRank(){
+      const order=[...list.querySelectorAll('.rank-item')].map(el=>+el.dataset.i);
+      pendingAnswer={type:'ranking',order};
+      checkReady();
+    }
+    function moveItem(el, dir){
+      if(dir < 0){
+        const prev = el.previousElementSibling;
+        if(prev) list.insertBefore(el, prev);
+      } else {
+        const next = el.nextElementSibling;
+        if(next) list.insertBefore(next, el);
+      }
+      updateNums();
+      captureRank();
+    }
+
+    list.querySelectorAll('.rank-item').forEach(el=>{
+      // Desktop drag — disabled when interaction originates from a button
+      el.addEventListener('dragstart',e=>{
+        if(e.target.closest('.rank-btn')){ e.preventDefault(); return; }
+        dragging=el; el.classList.add('dragging');
+      });
+      el.addEventListener('dragend',e=>{el.classList.remove('dragging');dragging=null;updateNums();captureRank()});
+      el.addEventListener('dragover',e=>{
+        e.preventDefault();
+        const rect=el.getBoundingClientRect();
+        const after=(e.clientY-rect.top)/rect.height>0.5;
+        if(dragging && dragging!==el){
+          if(after) el.parentNode.insertBefore(dragging,el.nextSibling);
+          else el.parentNode.insertBefore(dragging,el);
+        }
+      });
+
+      // Mobile/touch-friendly buttons
+      const up = el.querySelector('.rank-up');
+      const down = el.querySelector('.rank-down');
+      if(up)   up.addEventListener('click', ev=>{ ev.preventDefault(); ev.stopPropagation(); moveItem(el,-1); });
+      if(down) down.addEventListener('click', ev=>{ ev.preventDefault(); ev.stopPropagation(); moveItem(el, 1); });
+    });
+
+    updateNums();
+    captureRank();
+  }
+}
+
+/* ============================================================
+   SCORING
+============================================================ */
+function scoreAnswer(q,ans){
+  const mcqLike = ['mcq','scenario','timed','firstAction','consistency'];
+  if(mcqLike.includes(q.type)){
+    return {raw:q.opts[ans.i].s,max:4};
+  }
+  if(q.type==='bestworst'){
+    // best should have highest score; worst should have lowest
+    const sorted=[...q.opts].map((o,i)=>({i,s:o.s})).sort((a,b)=>b.s-a.s);
+    const bestIdx=sorted[0].i, worstIdx=sorted[sorted.length-1].i;
+    let raw=0;
+    if(ans.best===bestIdx) raw+=2;
+    else if(q.opts[ans.best].s>=3) raw+=1;
+    if(ans.worst===worstIdx) raw+=2;
+    else if(q.opts[ans.worst].s<=1) raw+=1;
+    return {raw,max:4};
+  }
+  if(q.type==='ranking'){
+    // compare order to expected
+    const expected=[...q.opts].map((o,i)=>({i,r:o.rank})).sort((a,b)=>a.r-b.r).map(x=>x.i);
+    const userOrder=ans.order;
+    let correctPositions=0;
+    for(let i=0;i<expected.length;i++) if(expected[i]===userOrder[i]) correctPositions++;
+    // partial: count adjacent swaps tolerance
+    const ratio=correctPositions/expected.length;
+    return {raw:Math.round(ratio*4),max:4};
+  }
+  return {raw:0,max:4};
+}
+
+function submitQ(){
+  if(!pendingAnswer || !pendingConfidence) return;
+  const q=state.testQueue[state.testIdx];
+  const sc=scoreAnswer(q,pendingAnswer);
+  const timeMs = Date.now() - state.questionStartTime;
+  // Time-pressure penalty: timed questions exceeding limit by 50% lose 10% of score
+  let norm=sc.raw/sc.max;
+  let overTime = false;
+  if(q.timer && timeMs > q.timer*1500){
+    overTime = true;
+    norm = Math.max(0, norm * 0.85);
+  }
+  const learnerState = classifyLearnerState(norm, pendingConfidence);
+  state.answers[q.id]={
+    choice:pendingAnswer, raw:sc.raw, max:sc.max,
+    c:q.c, lvl:q.lvl, norm,
+    confidence: pendingConfidence,
+    learnerState,
+    stage: q._stage || 'core',
+    meta: q._meta || null,
+    timeMs, overTime
+  };
+  // stop timer if running
+  if(_timerHandle){clearInterval(_timerHandle);_timerHandle=null}
+
+  const stat=state.competencyScores[q.c];
+  const w = q.lvl;
+  stat.sum += sc.raw*w;
+  stat.n += sc.max*w;
+  if(norm>=0.95) stat.perfect++;
+  if(q.lvl>stat.maxLvl) stat.maxLvl=q.lvl;
+
+  // Stage stats
+  const stage = q._stage || 'core';
+  if(state.stageStats[stage]){
+    state.stageStats[stage].seen++;
+    if(norm>=0.65) state.stageStats[stage].passed++;
+  }
+  // Track max challenge level reached on a passed question
+  if(norm>=0.65 && q.lvl>state.maxChallengeLevel) state.maxChallengeLevel = q.lvl;
+
+  // Pair tracking for consistency questions
+  if(q.type==='consistency' && q.pairWith){
+    state.pairAnswers[q.id] = {state:learnerState, norm, pair:q.pairWith};
+  }
+
+  // ----- Badge engine -----
+  evaluateBadges(q, norm, learnerState, overTime);
+
+  // toast tailored to learner state
+  const stateMsgs = {
+    mastered:["استجابة ناضجة وثابتة","نمط أداء عالٍ","علامة على إتقان حقيقي"],
+    unconscious:["نتيجة جيدة — لاحظ ثقتك في قراراتك","قدراتك أفضل مما تتصور","استمر بثقة أكبر"],
+    misinformed:["نتابع بدقة لتقييم الفهم العميق","نمط يحتاج تحققًا","المنصة تقيس بعدالة"],
+    doubt:["نمط طبيعي في طور التعلم","استمر — البيانات تتراكم","المنصة تكيّف الأسئلة معك"]
+  };
+  if((state.testIdx+1)%4===0){
+    const arr = stateMsgs[learnerState] || ["إجابة مسجّلة"];
+    toast(arr[Math.floor(Math.random()*arr.length)]);
+  }
+
+  // adaptive
+  adaptAfterAnswer(q,norm,pendingConfidence);
+
+  state.testIdx++;
+  if(state.testIdx>=state.testQueue.length){
+    finalizeAndShowResult();
+  } else {
+    renderQ();
+  }
+}
+
+function evaluateBadges(q, norm, learnerState, overTime){
+  function award(id){
+    if(state.badges.includes(id)) return;
+    state.badges.push(id);
+    const b = BADGES_DEF[id];
+    showBadgeUnlock(b);
+  }
+  // 1) قرار دقيق — 3 mastered in a row
+  if(learnerState==='mastered') state.consecutiveMastered++; else state.consecutiveMastered=0;
+  if(state.consecutiveMastered>=3) award('decision_precise');
+
+  // 2) فهم مستفيد متقدم — C1 mastered ratio >= 0.7 with at least 3 C1 answers
+  if(q.c==='C1'){
+    const ks = state.knowledgeStates.C1;
+    const tot = ks.mastered+ks.unconscious+ks.misinformed+ks.doubt;
+    if(tot>=3 && ks.mastered/Math.max(1,tot) >= 0.7) award('beneficiary_master');
+  }
+
+  // 3) ثبات في الأداء — variance < 0.18 across last 5 norms
+  const norms = Object.values(state.answers).map(a=>a.norm);
+  if(norms.length>=5){
+    const last5 = norms.slice(-5);
+    const v = Math.max(...last5)-Math.min(...last5);
+    if(v<=0.18 && last5.every(x=>x>=0.55)) award('consistency');
+  }
+
+  // 4) تحليل متميز — 2 consecutive mastered in C2
+  if(q.c==='C2' && learnerState==='mastered') state.consecutiveAnalysis++;
+  else if(q.c==='C2') state.consecutiveAnalysis=0;
+  if(state.consecutiveAnalysis>=2) award('analysis_excellence');
+
+  // 5) قرار تحت الضغط — timed question with norm>=0.75 and not overtime
+  if(q.type==='timed' && norm>=0.75 && !overTime) award('pressure_resolver');
+
+  // 6) مواجهة التحدي — 3 challenge-stage questions passed
+  const challengePassed = Object.values(state.answers).filter(a=>a.stage==='challenge' && a.norm>=0.65).length;
+  if(challengePassed>=3) award('challenger');
+
+  // 7) تحقق ناجح — validation/confirmation question with norm>=0.7
+  if((q._meta==='validation' || q._meta==='confirmation') && norm>=0.7) award('validator');
+}
+
+function showBadgeUnlock(b){
+  // create transient unlock toast
+  const old = document.getElementById('badgeUnlock');
+  if(old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'badge-unlock-toast';
+  el.id = 'badgeUnlock';
+  el.innerHTML = `
+    <div class="big-icon">${b.icon}</div>
+    <div class="text"><strong>تم فتح شارة: ${b.name}</strong><small>${b.desc}</small></div>
+  `;
+  document.body.appendChild(el);
+  setTimeout(()=>el.classList.add('show'),50);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200);
+  // refresh badges bar
+  renderBadges();
+}
+
+/* ============================================================
+   FINALIZE
+============================================================ */
+function finalizeAndShowResult(){
+  // ---- Raw competency scores (correctness-based) ----
+  const compScores={};
+  Object.keys(COMPETENCIES).forEach(c=>{
+    const st=state.competencyScores[c];
+    compScores[c] = st.n>0 ? Math.round((st.sum/st.n)*100) : 0;
+  });
+
+  // ---- Knowledge State per competency (4-quadrant) ----
+  const knowledgeStates = {};
+  const masteries = {};
+  Object.keys(COMPETENCIES).forEach(c=>{
+    const ks = state.knowledgeStates[c];
+    const total = ks.mastered + ks.unconscious + ks.misinformed + ks.doubt;
+    const pct = {
+      mastered:    total? Math.round(ks.mastered/total*100):0,
+      unconscious: total? Math.round(ks.unconscious/total*100):0,
+      misinformed: total? Math.round(ks.misinformed/total*100):0,
+      doubt:       total? Math.round(ks.doubt/total*100):0
+    };
+    // Knowledge State (probability of true mastery, 0-100)
+    // إتقان = درجة كاملة، غير واعٍ = نصف، ثقة زائفة = خصم كبير، طور تعلم = خصم بسيط
+    const knowledgeState = total>0 ? Math.max(0, Math.min(100, Math.round(
+      (ks.mastered*1.0 + ks.unconscious*0.5 - ks.misinformed*0.6 + ks.doubt*0.15) / total * 100
+    ))) : 0;
+
+    // Mastery level
+    const reachedL3 = state.competencyScores[c].maxLvl >= 3;
+    const reachedL2 = state.competencyScores[c].maxLvl >= 2;
+    const masteredHigh = ks.levelsMastered.has(3);
+    let level = 'Beginner';
+    if(knowledgeState>=80 && masteredHigh && pct.misinformed<=15) level='Advanced';
+    else if(knowledgeState>=65 && reachedL2 && pct.misinformed<=25) level='Proficient';
+    else if(knowledgeState>=40) level='Developing';
+    else level='Beginner';
+
+    knowledgeStates[c] = {raw:{...ks, levelsMastered:[...ks.levelsMastered]}, pct, knowledgeState, total};
+    masteries[c] = {level, knowledgeState, pct, total};
+  });
+
+  // ---- Confidence Calibration (org diagnostic) ----
+  // calibration: how aligned confidence is with correctness
+  // 100 = perfectly calibrated (high conf = correct, low conf = wrong)
+  // 0 = inverted (Dunning-Kruger pattern)
+  let calibSum = 0, calibN = 0;
+  state.confidencePattern.forEach(p=>{
+    const cVal = p.confidence==='very_confident'?1.0 : p.confidence==='confident'?0.66 : 0.33;
+    const align = 1 - Math.abs(cVal - p.scoreNorm); // 0..1
+    calibSum += align; calibN++;
+  });
+  const calibration = calibN>0 ? Math.round((calibSum/calibN)*100) : 0;
+
+  // ---- Aggregate learner-state counts ----
+  const ksAgg = {mastered:0,unconscious:0,misinformed:0,doubt:0};
+  Object.values(state.knowledgeStates).forEach(k=>{
+    ksAgg.mastered+=k.mastered; ksAgg.unconscious+=k.unconscious;
+    ksAgg.misinformed+=k.misinformed; ksAgg.doubt+=k.doubt;
+  });
+  const totalAns = ksAgg.mastered+ksAgg.unconscious+ksAgg.misinformed+ksAgg.doubt;
+  const ksAggPct = {
+    mastered:    totalAns? Math.round(ksAgg.mastered/totalAns*100):0,
+    unconscious: totalAns? Math.round(ksAgg.unconscious/totalAns*100):0,
+    misinformed: totalAns? Math.round(ksAgg.misinformed/totalAns*100):0,
+    doubt:       totalAns? Math.round(ksAgg.doubt/totalAns*100):0
+  };
+
+  // ---- Pattern detection ----
+  const patterns = detectPatterns(masteries, state.knowledgeStates);
+
+  // ---- Composite Overall (correctness adjusted by misinformation rate) ----
+  const baseOverall = Math.round(Object.values(compScores).reduce((a,b)=>a+b,0)/8);
+  const overall = Math.max(0, Math.min(100, Math.round(
+    baseOverall * (1 - ksAggPct.misinformed*0.005) // up to -50% penalty for very high misinformation
+  )));
+
+  // maturity from mastery levels
+  const masteryRank = {Beginner:0, Developing:1, Proficient:2, Advanced:3};
+  const avgMastery = Object.values(masteries).reduce((a,m)=>a+masteryRank[m.level],0)/8;
+  const maturity = Math.round((avgMastery/3)*100);
+
+  // consistency
+  const consistencyVar = state.consistency.length>1 ? (Math.max(...state.consistency)-Math.min(...state.consistency)) : 0;
+  const consistencyScore = Math.round((1 - Math.min(consistencyVar,1))*100);
+
+  // realism
+  let realism = "ضمن المعدّل المتوقع";
+  if(ksAggPct.misinformed>=30) realism = "تنبيه: ثقة زائفة متكررة";
+  else if(ksAggPct.mastered>=85 && totalAns>=10) realism = "تنبيه: أنماط إتقان مثالية بشكل لافت";
+
+  // ---- Final classification ----
+  const decisionM = masteries.C3.level;
+  const leadershipM = masteries.C5.level;
+  let level = "DR";
+  const advancedCount = Object.values(masteries).filter(m=>m.level==='Advanced').length;
+  const proficientPlus = Object.values(masteries).filter(m=>m.level==='Proficient'||m.level==='Advanced').length;
+  if(overall>=80 && advancedCount>=3 && (leadershipM==='Advanced'||leadershipM==='Proficient') && (decisionM==='Advanced'||decisionM==='Proficient') && ksAggPct.misinformed<=15) level="HLP";
+  else if(overall>=68 && proficientPlus>=4 && ksAggPct.misinformed<=25) level="EP";
+  else if(overall>=55 && proficientPlus>=2) level="FP";
+  else if(overall>=40) level="DR";
+  else level="RM";
+
+  // strengths & gaps (use knowledgeState, not raw correctness)
+  const ksByComp = Object.fromEntries(Object.entries(masteries).map(([c,m])=>[c,m.knowledgeState]));
+  const sorted = Object.entries(ksByComp).sort((a,b)=>b[1]-a[1]);
+  const strengths = sorted.slice(0,3);
+  const gaps = sorted.slice(-3).reverse();
+
+  const dur = Math.round((Date.now()-state.sessionStart)/60000);
+
+  // ---- Stage-pass rates ----
+  const stagePass = {};
+  Object.keys(state.stageStats).forEach(s=>{
+    const st = state.stageStats[s];
+    stagePass[s] = {
+      seen:st.seen, total:st.total, passed:st.passed,
+      rate: st.seen>0 ? Math.round(st.passed/st.seen*100) : 0
+    };
+  });
+
+  // ---- Behavioral consistency check (paired questions) ----
+  let pairConsistency = null;
+  const pairedAnswers = Object.values(state.pairAnswers);
+  if(pairedAnswers.length>=1){
+    let consistent = 0, total = 0;
+    pairedAnswers.forEach(p=>{
+      const pair = state.answers[p.pair];
+      if(pair){
+        total++;
+        const diff = Math.abs(p.norm - pair.norm);
+        if(diff<=0.25) consistent++;
+      }
+    });
+    pairConsistency = total>0 ? Math.round(consistent/total*100) : null;
+  }
+
+  const record = {
+    id: 'r_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8),
+    user: state.user.username,
+    name: state.user.name,
+    dept: state.user.dept,
+    role: state.user.role,
+    date: new Date().toISOString(),
+    overall, compScores, level,
+    maturity, consistencyScore, calibration, realism,
+    duration:dur,
+    strengths, gaps,
+    masteries, knowledgeStates,
+    ksAgg, ksAggPct,
+    patterns,
+    badges: [...state.badges],
+    maxChallengeLevel: state.maxChallengeLevel,
+    stagePass,
+    difficultyRaisedAt: [...state.difficultyRaisedAt],
+    totalQuestions: Object.keys(state.answers).length,
+    pairConsistency
+  };
+  state.records.push(record);
+  saveRecords();
+  pushRecordToCloud(record);
+  renderResult(record);
+  show('screen-result');
+}
+
+function detectPatterns(masteries, knowledgeStates){
+  const out = [];
+  Object.keys(COMPETENCIES).forEach(c=>{
+    const ks = knowledgeStates[c];
+    const total = ks.mastered+ks.unconscious+ks.misinformed+ks.doubt;
+    if(total<2) return;
+    const m = ks.mastered/total, u = ks.unconscious/total, i = ks.misinformed/total, d = ks.doubt/total;
+    if(i>=0.4) out.push({type:'overconfidence', c, severity:'high', text:`ثقة زائفة في «${COMPETENCIES[c].full}» — إجابات خاطئة بثقة عالية (${Math.round(i*100)}٪).`});
+    else if(i>=0.25) out.push({type:'overconfidence', c, severity:'med', text:`مؤشر ثقة زائفة في «${COMPETENCIES[c].full}» يستحق المتابعة.`});
+    if(u>=0.4) out.push({type:'underconfidence', c, text:`نقص ثقة في «${COMPETENCIES[c].full}» — قدراتك أفضل من تقديرك (${Math.round(u*100)}٪ إجابات صحيحة بثقة منخفضة).`});
+    if(m>=0.65 && i<=0.15) out.push({type:'true_mastery', c, text:`إتقان حقيقي ومُعايَر في «${COMPETENCIES[c].full}» (${Math.round(m*100)}٪).`});
+    if(d>=0.5) out.push({type:'learning_zone', c, text:`«${COMPETENCIES[c].full}» في طور التعلم — يحتاج تكثيف الممارسة.`});
+  });
+  return out;
+}
+
+/* ============================================================
+   RESULT VIEW
+============================================================ */
+function renderResult(r){
+  const lv=LEVELS[r.level];
+  const recs = developmentPlan(r);
+  const html = `
+  <div class="result-hero">
+    <div>
+      <h2>${r.name} — ${r.dept}</h2>
+      <div class="muted" style="color:#cdd7e6">تم إكمال التقييم في ${r.duration} دقيقة • ${new Date(r.date).toLocaleString('ar-SA')}</div>
+      <div class="lvl-pill">${lv.label} — ${lv.ar}</div>
+      <p style="color:#dde6f5;line-height:2;margin-top:14px;font-size:14px">${lv.desc}</p>
+      <div class="flex" style="margin-top:8px">
+        <span class="badge-pill">نضج: ${toAr(r.maturity)}٪</span>
+        <span class="badge-pill">ثبات: ${toAr(r.consistencyScore)}٪</span>
+        <span class="badge-pill">معايرة الثقة: ${toAr(r.calibration)}٪</span>
+        <span class="badge-pill">${r.realism}</span>
+      </div>
+    </div>
+    <div>
+      <div class="score-ring" style="--p:${r.overall}">
+        <div><div class="num">${toAr(r.overall)}</div><div class="lbl">الدرجة الإجمالية / ١٠٠</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-grid">
+    ${metric("فهم المستفيد",r.compScores.C1)}
+    ${metric("اتخاذ القرار",r.compScores.C3)}
+    ${metric("القيادة والتأثير",r.compScores.C5)}
+    ${metric("التفكير التحليلي",r.compScores.C2)}
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>تحليل حالة المعرفة</h3>
+    <div class="sub">تحليل التباين بين دقة الإجابة ومستوى الثقة لتمييز الإتقان الحقيقي عن الثقة الزائفة والتخمين الموفّق</div>
+    <div class="learner-matrix">
+      <div class="matrix-cell mastered">
+        <h5>إتقان حقيقي</h5>
+        <div class="v">${toAr(r.ksAgg.mastered)}</div>
+        <div class="ratio">${toAr(r.ksAggPct.mastered)}٪ من الإجابات</div>
+        <div class="desc">إجابة صحيحة + ثقة عالية. مؤشر معرفة موثوقة قابلة للاعتماد عليها قياديًا.</div>
+      </div>
+      <div class="matrix-cell unconscious">
+        <h5>كفاءة غير واعية</h5>
+        <div class="v">${toAr(r.ksAgg.unconscious)}</div>
+        <div class="ratio">${toAr(r.ksAggPct.unconscious)}٪ من الإجابات</div>
+        <div class="desc">إجابة صحيحة + ثقة منخفضة. القدرة موجودة لكن الثقة بالنفس تحتاج تعزيزًا.</div>
+      </div>
+      <div class="matrix-cell misinformed">
+        <h5>ثقة زائفة</h5>
+        <div class="v">${toAr(r.ksAgg.misinformed)}</div>
+        <div class="ratio">${toAr(r.ksAggPct.misinformed)}٪ من الإجابات</div>
+        <div class="desc">إجابة خاطئة + ثقة عالية. أخطر الأنماط — يستلزم إعادة تأطير وتدريب موجّه.</div>
+      </div>
+      <div class="matrix-cell doubt">
+        <h5>طور التعلم</h5>
+        <div class="v">${toAr(r.ksAgg.doubt)}</div>
+        <div class="ratio">${toAr(r.ksAggPct.doubt)}٪ من الإجابات</div>
+        <div class="desc">إجابة خاطئة + ثقة منخفضة. حالة تعلم طبيعية وصحية — قابلة للتحسن بسرعة.</div>
+      </div>
+    </div>
+    <div class="calibration-meter" title="معايرة الثقة">
+      <div style="font-size:13px;color:var(--muted);min-width:140px">معايرة الثقة بالأداء</div>
+      <div class="gauge">
+        <span style="width:100%"></span>
+        <div class="marker" style="right:${r.calibration}%"></div>
+      </div>
+      <div style="font-weight:800;color:var(--navy);min-width:50px;text-align:left">${toAr(r.calibration)}٪</div>
+    </div>
+    <div class="hint" style="margin-top:6px">
+      ١٠٠٪ = ثقتك متطابقة مع جودة قراراتك. كلما اقترب الرقم من ١٠٠ كان حكمك على نفسك أكثر دقة.
+    </div>
+  </div>
+
+  <div class="competency-card" style="margin-top:14px">
+    <h3>تفصيل الكفاءات — مستوى الإتقان وحالة المعرفة</h3>
+    <div class="sub">لكل محور: مستوى الإتقان (Mastery)، حالة المعرفة المركّبة، وتوزيع الأنماط الأربعة.</div>
+    <div class="knowledge-legend" style="margin-bottom:10px">
+      <span><i style="background:#16A34A"></i>إتقان حقيقي</span>
+      <span><i style="background:#3B82F6"></i>كفاءة غير واعية</span>
+      <span><i style="background:#DC2626"></i>ثقة زائفة</span>
+      <span><i style="background:#F59E0B"></i>طور التعلم</span>
+    </div>
+    ${Object.keys(COMPETENCIES).map(c=>{
+      const m = r.masteries[c];
+      const p = m.pct;
+      return `
+      <div style="padding:10px 0;border-bottom:1px dashed var(--line)">
+        <div class="cmp-row" style="border:none;padding:0">
+          <div class="name">
+            <span class="mastery-pill mst-${m.level}">${MASTERY[m.level].ar}</span>
+            ${COMPETENCIES[c].full}
+          </div>
+          <div class="bar"><span style="width:${m.knowledgeState}%;background:${COMPETENCIES[c].color}"></span></div>
+          <div class="score">${toAr(m.knowledgeState)}٪</div>
+        </div>
+        ${m.total>0 ? `
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;margin-top:6px;padding-right:0">
+            <span class="muted" style="font-size:11px;min-width:90px">حالة المعرفة:</span>
+            <div class="knowledge-bar">
+              <span class="seg-mastered" style="width:${p.mastered}%" title="إتقان حقيقي ${p.mastered}٪"></span>
+              <span class="seg-unconscious" style="width:${p.unconscious}%" title="كفاءة غير واعية ${p.unconscious}٪"></span>
+              <span class="seg-misinformed" style="width:${p.misinformed}%" title="ثقة زائفة ${p.misinformed}٪"></span>
+              <span class="seg-doubt" style="width:${p.doubt}%" title="طور التعلم ${p.doubt}٪"></span>
+            </div>
+          </div>
+        ` : ''}
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>رحلتك في مراحل التقييم</h3>
+    <div class="sub">إجمالي ${toAr(r.totalQuestions||0)} سؤالًا عبر ٤ مراحل — أعلى مستوى تحدٍّ وصلت إليه: ${toAr(r.maxChallengeLevel)}/٣</div>
+    <div class="stage-summary">
+      <div class="stage-card reached">
+        <div class="stg-ico">١</div>
+        <h5>التهيئة</h5>
+        <div class="seen">٥ أسئلة تمهيدية</div>
+        <div class="pass-rate">✓</div>
+      </div>
+      <div class="stage-card ${r.stagePass.core.seen>0?'reached':''}">
+        <div class="stg-ico">٢</div>
+        <h5>التقييم الأساسي</h5>
+        <div class="pass-rate">${toAr(r.stagePass.core.rate)}٪</div>
+        <div class="seen">${toAr(r.stagePass.core.passed)} من ${toAr(r.stagePass.core.seen)}</div>
+      </div>
+      <div class="stage-card ${r.stagePass.challenge.seen>0?'reached':''}">
+        <div class="stg-ico">٣</div>
+        <h5>التحدي</h5>
+        <div class="pass-rate">${toAr(r.stagePass.challenge.rate)}٪</div>
+        <div class="seen">${toAr(r.stagePass.challenge.passed)} من ${toAr(r.stagePass.challenge.seen)}</div>
+      </div>
+      <div class="stage-card ${r.stagePass.validation.seen>0?'reached':''}">
+        <div class="stg-ico">٤</div>
+        <h5>التحقق النهائي</h5>
+        <div class="pass-rate">${toAr(r.stagePass.validation.rate)}٪</div>
+        <div class="seen">${toAr(r.stagePass.validation.passed)} من ${toAr(r.stagePass.validation.seen)}</div>
+      </div>
+    </div>
+
+    ${r.difficultyRaisedAt && r.difficultyRaisedAt.length>0 ? `
+      <h3 style="margin-top:18px;font-size:15px">المواضع التي رُفع فيها مستوى الصعوبة</h3>
+      <div class="sub">قرّر النظام رفع التحدي بناءً على نمط أدائك في هذه اللحظات</div>
+      <div class="difficulty-log">
+        ${r.difficultyRaisedAt.map(d=>`
+          <div class="diff-event">
+            <span style="font-size:18px">⚡</span>
+            <div style="flex:1">
+              <strong>${COMPETENCIES[d.c].full}</strong>
+              <span class="muted" style="font-size:12px"> — السؤال رقم ${toAr(d.idx+1)}</span>
+            </div>
+            <span class="from-to">L${toAr(d.fromLvl)} → L${toAr(d.toLvl)}</span>
+            <span class="muted" style="font-size:11px">(${reasonLabel(d.reason)})</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div class="muted" style="margin-top:10px">لم يتم رفع مستوى الصعوبة في هذه الجلسة — أدّى المشارك بثبات.</div>'}
+  </div>
+
+  ${r.badges && r.badges.length>0 ? `
+    <div class="card" style="margin-top:14px">
+      <h3>الشارات المكتسبة</h3>
+      <div class="sub">شارات احترافية تعكس أنماط أداء معيّنة</div>
+      <div class="badges-bar">
+        ${r.badges.map(id=>{const b=BADGES_DEF[id];return `<span class="badge-earned" title="${b.desc}"><span class="icon">${b.icon}</span>${b.name}</span>`}).join('')}
+        ${Object.keys(BADGES_DEF).filter(id=>!r.badges.includes(id)).map(id=>{const b=BADGES_DEF[id];return `<span class="badge-earned badge-locked" title="${b.desc}"><span class="icon">🔒</span>${b.name}</span>`}).join('')}
+      </div>
+    </div>` : ''}
+
+  ${r.patterns.length>0 ? `
+    <div class="card" style="margin-top:14px">
+      <h3>أنماط مكتشفة (Pattern Analysis)</h3>
+      <div class="sub">تحليل عابر للأسئلة على مستوى المحور وليس على إجابة منفردة</div>
+      ${r.patterns.map(p=>`
+        <div class="pattern-card">
+          <span class="badge ${patternBadge(p.type)}">${patternLabel(p.type)}</span>
+          <div style="font-size:13.5px;line-height:1.9">${p.text}</div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+  <div class="dash-grid" style="margin-top:14px">
+    <div class="card col-6">
+      <h3>أعلى ٣ محاور (حسب حالة المعرفة)</h3>
+      <ol class="dev-list">
+        ${r.strengths.map(([c,v])=>`<li><strong>${COMPETENCIES[c].full}</strong> — KS ${toAr(v)}٪ <span class="mastery-pill mst-${r.masteries[c].level}">${MASTERY[r.masteries[c].level].ar}</span></li>`).join('')}
+      </ol>
+    </div>
+    <div class="card col-6">
+      <h3>أهم ٣ فجوات تطويرية</h3>
+      <ol class="dev-list">
+        ${r.gaps.map(([c,v])=>`<li><strong>${COMPETENCIES[c].full}</strong> — KS ${toAr(v)}٪ <span class="mastery-pill mst-${r.masteries[c].level}">${MASTERY[r.masteries[c].level].ar}</span></li>`).join('')}
+      </ol>
+    </div>
+    <div class="card col-12">
+      <h3>التوصية والمسار القيادي</h3>
+      <div class="sub">${recommendation(r)}</div>
+      <div class="plan-grid">
+        <div class="plan"><h5>أول ٣٠ يومًا</h5><ul>${recs.d30.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div class="plan"><h5>اليوم ٣١ – ٦٠</h5><ul>${recs.d60.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div class="plan"><h5>اليوم ٦١ – ٩٠</h5><ul>${recs.d90.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('resultHost').innerHTML = html;
+}
+function patternLabel(t){
+  return {overconfidence:"ثقة زائفة",underconfidence:"نقص ثقة",true_mastery:"إتقان حقيقي",learning_zone:"طور تعلم"}[t]||t;
+}
+function patternBadge(t){
+  return {overconfidence:"bdg-warn",underconfidence:"bdg-amber",true_mastery:"bdg-good",learning_zone:"bdg-info"}[t]||"bdg-info";
+}
+function reasonLabel(r){
+  return {
+    'mastered+confident':'إتقان وثقة عالية',
+    'repeated-unconscious':'تكرار نمط ثقة منخفضة',
+    'oscillation':'تذبذب في الإجابات'
+  }[r] || r;
+}
+function metric(name,v){
+  return `<div class="metric"><div class="name">${name}</div><div class="v">${toAr(v)}٪</div><div class="bar"><span style="width:${v}%"></span></div></div>`;
+}
+function strengthInsight(c){
+  return {
+    C1:"حسّ خدمي عالٍ", C2:"تفكير منهجي", C3:"حسم متّزن", C4:"وعي بيئة العمل",
+    C5:"ميل قيادي طبيعي", C6:"وضوح في الرسالة", C7:"موثوقية مهنية", C8:"مرونة وتقبّل تطوّر"
+  }[c];
+}
+function gapInsight(c){
+  return {
+    C1:"تعميق فهم احتياج المستفيد", C2:"تمييز السبب الجذري", C3:"موازنة السرعة بالجودة",
+    C4:"إدارة المواقف الضاغطة", C5:"التأثير دون سلطة", C6:"اختيار الأسلوب حسب الطرف",
+    C7:"الالتزام بالإجراءات", C8:"تقبّل الملاحظات والتغيير"
+  }[c];
+}
+function recommendation(r){
+  if(r.level==='HLP') return "مرشّح للترشيح في برنامج إعداد القيادات. يُوصى بتكليفه بمشاريع متقاطعة بين الإدارات.";
+  if(r.level==='EP')  return "إمكانات واضحة. خطة تطوير ٩٠ يومًا مع موجّه (Mentor) قبل الترشيح القيادي.";
+  if(r.level==='FP')  return "أداء جيد في الدور الحالي. التركيز على توسيع الكفاءات قبل التفكير في أدوار أكبر.";
+  if(r.level==='DR')  return "خطة تطوير شاملة لمدة ٦ أشهر مع متابعة من المشرف المباشر.";
+  return "إعادة تقييم لمواءمة الدور مع الأسلوب والقدرات الحالية.";
+}
+function developmentPlan(r){
+  const weakest = r.gaps[0][0];
+  const labels = COMPETENCIES[weakest].full;
+  const hasMisinformed = r.ksAggPct.misinformed >= 25;
+  const hasUnderconf  = r.ksAggPct.unconscious >= 30;
+  const d30 = [
+    `جلسة موجّه (Mentor) أسبوعية حول ${labels}.`,
+    "قراءة موجّهة: حالتان واقعيتان من إدارتك مع تحليل مكتوب.",
+    "ملاحظة ميدانية: مرافقة مشرف ذي خبرة لمدة يوم."
+  ];
+  if(hasMisinformed) d30.push("ورشة «فحص الافتراضات» — مراجعة قرارات سابقة وتفنيد منطقها مع موجّه.");
+  if(hasUnderconf)  d30.push("جلسة عرض داخلي قصيرة لبناء الثقة في ما تعرفه فعلًا.");
+
+  const d60 = [
+    "تكليف بمشروع تشغيلي صغير بحدود واضحة.",
+    "تقديم عرض داخلي (١٠ دقائق) عن درس مستفاد.",
+    "تقييم ٣٦٠ مصغّر من ٣ زملاء."
+  ];
+  if(hasMisinformed) d60.push("تكليف بقرار يتطلب تبرير المنطق كتابيًا قبل التنفيذ.");
+
+  const d90 = [
+    "قيادة فريق مهام مؤقت لإنجاز تحسين تشغيلي.",
+    "كتابة مذكرة قرار رسمية مدعومة بالبيانات.",
+    "مراجعة مع لجنة الكفاءات لتقييم الانتقال للمسار القيادي."
+  ];
+  return {d30,d60,d90};
+}
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+let charts={};
+function renderDashboard(){
+  const records = state.records;
+  const dept = state.user?.dept || "—";
+  const tot = records.length;
+  const counts={HLP:0,EP:0,FP:0,DR:0,RM:0};
+  records.forEach(r=>counts[r.level]++);
+  const avgC={};
+  Object.keys(COMPETENCIES).forEach(c=>{
+    const arr=records.map(r=>r.compScores[c]).filter(v=>typeof v==='number');
+    avgC[c] = arr.length? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : 0;
+  });
+  const ranked = [...records].sort((a,b)=>b.overall-a.overall);
+  const top10 = ranked.slice(0,Math.max(1,Math.ceil(records.length*0.1)));
+  const top20 = ranked.slice(0,Math.max(1,Math.ceil(records.length*0.2)));
+
+  const byRole = groupAvg(records,'role');
+  const byDept = groupAvg(records,'dept');
+
+  // aggregate metrics
+  const orgKS = {mastered:0,unconscious:0,misinformed:0,doubt:0};
+  let orgCalib = 0, orgCalibN = 0;
+  records.forEach(r=>{
+    if(r.ksAgg){
+      orgKS.mastered+=r.ksAgg.mastered;
+      orgKS.unconscious+=r.ksAgg.unconscious;
+      orgKS.misinformed+=r.ksAgg.misinformed;
+      orgKS.doubt+=r.ksAgg.doubt;
+    }
+    if(typeof r.calibration==='number'){orgCalib+=r.calibration;orgCalibN++}
+  });
+  const orgKSTot = orgKS.mastered+orgKS.unconscious+orgKS.misinformed+orgKS.doubt;
+  const orgKSPct = orgKSTot>0 ? {
+    mastered: Math.round(orgKS.mastered/orgKSTot*100),
+    unconscious: Math.round(orgKS.unconscious/orgKSTot*100),
+    misinformed: Math.round(orgKS.misinformed/orgKSTot*100),
+    doubt: Math.round(orgKS.doubt/orgKSTot*100)
+  } : {mastered:0,unconscious:0,misinformed:0,doubt:0};
+  const avgCalib = orgCalibN>0 ? Math.round(orgCalib/orgCalibN) : 0;
+
+  // Mastery distribution per competency
+  const masteryDist = {};
+  Object.keys(COMPETENCIES).forEach(c=>{
+    masteryDist[c] = {Beginner:0,Developing:0,Proficient:0,Advanced:0};
+    records.forEach(r=>{
+      if(r.masteries && r.masteries[c]) masteryDist[c][r.masteries[c].level]++;
+    });
+  });
+
+  // Top patterns across the org
+  const patternTally = {};
+  records.forEach(r=>(r.patterns||[]).forEach(p=>{
+    const key = p.type+'_'+p.c;
+    patternTally[key] = patternTally[key]||{type:p.type,c:p.c,count:0};
+    patternTally[key].count++;
+  }));
+  const topPatterns = Object.values(patternTally).sort((a,b)=>b.count-a.count).slice(0,6);
+
+  const html = `
+    <div class="info-grid">
+      <div class="kpi"><div class="lbl">إجمالي المشاركين</div><div class="val">${toAr(tot)}</div><div class="delta">${tot===0?'لا توجد بيانات بعد':'تحديث لحظي'}</div></div>
+      <div class="kpi"><div class="lbl">High Leadership Potential</div><div class="val">${toAr(counts.HLP)}</div><div class="delta">مرشحون قياديون</div></div>
+      <div class="kpi"><div class="lbl">معايرة الثقة المؤسسية</div><div class="val">${toAr(avgCalib)}٪</div><div class="delta" style="color:${avgCalib>=70?'#16A34A':'#D97706'}">${avgCalib>=70?'تطابق جيد':'تطابق متوسط'}</div></div>
+      <div class="kpi"><div class="lbl">معدل الثقة الزائفة</div><div class="val" style="color:${orgKSPct.misinformed>=25?'#B91C1C':'#0B2545'}">${toAr(orgKSPct.misinformed)}٪</div><div class="delta" style="color:#B91C1C">${orgKSPct.misinformed>=25?'⚠️ مرتفع':'ضمن النطاق'}</div></div>
+    </div>
+
+    <div class="dash-grid" style="margin-top:14px">
+      <div class="card col-6">
+        <h3>توزيع حالة المعرفة المؤسسية</h3>
+        <div class="sub">إجمالي إجابات المؤسسة موزّعة على المربعات الأربعة</div>
+        <div class="learner-matrix">
+          <div class="matrix-cell mastered"><h5>إتقان حقيقي</h5><div class="v">${toAr(orgKSPct.mastered)}٪</div><div class="ratio">${toAr(orgKS.mastered)} إجابة</div></div>
+          <div class="matrix-cell unconscious"><h5>كفاءة غير واعية</h5><div class="v">${toAr(orgKSPct.unconscious)}٪</div><div class="ratio">${toAr(orgKS.unconscious)} إجابة</div></div>
+          <div class="matrix-cell misinformed"><h5>ثقة زائفة</h5><div class="v">${toAr(orgKSPct.misinformed)}٪</div><div class="ratio">${toAr(orgKS.misinformed)} إجابة</div></div>
+          <div class="matrix-cell doubt"><h5>طور التعلم</h5><div class="v">${toAr(orgKSPct.doubt)}٪</div><div class="ratio">${toAr(orgKS.doubt)} إجابة</div></div>
+        </div>
+      </div>
+      <div class="card col-6">
+        <h3>توزيع المشاركين حسب Potential</h3>
+        <canvas id="chartLevels" height="220"></canvas>
+      </div>
+      <div class="card col-12">
+        <h3>توزيع مستويات Mastery لكل كفاءة</h3>
+        <div class="sub">عدد المشاركين في كل مستوى إتقان لكل محور — خريطة قراءة سريعة لجاهزية المؤسسة</div>
+        <canvas id="chartMastery" height="120"></canvas>
+      </div>
+      <div class="card col-8">
+        <h3>خريطة الكفاءات على مستوى المؤسسة</h3>
+        <canvas id="chartRadar" height="200"></canvas>
+      </div>
+      <div class="card col-4">
+        <h3>أبرز الأنماط المُكتشَفة</h3>
+        <div class="sub">عبر المشاركين</div>
+        ${topPatterns.length===0 ? '<div class="muted">لا توجد بيانات أنماط بعد.</div>' :
+          topPatterns.map(p=>`<div class="pattern-card"><span class="badge ${patternBadge(p.type)}">${patternLabel(p.type)}</span><div style="font-size:13px"><strong>${COMPETENCIES[p.c].ar}</strong> — ${toAr(p.count)} حالة</div></div>`).join('')}
+      </div>
+      <div class="card col-6">
+        <h3>مقارنة المستويات الوظيفية</h3>
+        <canvas id="chartRoles" height="200"></canvas>
+      </div>
+      <div class="card col-6">
+        <h3>مقارنة التخصصات</h3>
+        <canvas id="chartDepts" height="200"></canvas>
+      </div>
+      <div class="card col-12">
+        <h3>Heatmap للفجوات الأكثر تكرارًا</h3>
+        <div class="sub">المتوسط لكل كفاءة — كلما قلّ الرقم زادت الفجوة</div>
+        <div class="heatmap" style="margin-top:8px">
+          ${Object.keys(COMPETENCIES).map(c=>`
+            <div class="heat-cell" style="background:${heatColor(avgC[c])}">
+              <div>${COMPETENCIES[c].ar}</div>
+              <div class="v">${toAr(avgC[c])}٪</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="card col-6">
+        <h3>قائمة المرشحين القياديين (Top 10%)</h3>
+        <table class="tbl">
+          <thead><tr><th>الاسم</th><th>الإدارة</th><th>الدور</th><th>الدرجة</th><th>المستوى</th></tr></thead>
+          <tbody>${top10.map(r=>tr(r)).join('')||emptyRow()}</tbody>
+        </table>
+      </div>
+      <div class="card col-6">
+        <h3>قائمة من يحتاجون تطويرًا عاجلًا</h3>
+        <table class="tbl">
+          <thead><tr><th>الاسم</th><th>الإدارة</th><th>الدور</th><th>الدرجة</th><th>المستوى</th></tr></thead>
+          <tbody>${ranked.filter(r=>r.level==='DR'||r.level==='RM').slice(0,10).map(r=>tr(r)).join('')||emptyRow()}</tbody>
+        </table>
+      </div>
+      <div class="card col-12">
+        <h3>توصيات إعادة توزيع الكفاءات</h3>
+        <ul class="dev-list">
+          ${redistributionRecs(records).map(x=>`<li>${x}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="card col-12">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div>
+            <h3 style="margin:0">سجلّ جميع المشاركين</h3>
+            <div class="sub" id="allParticipantsMeta">${toAr(records.length)} مشاركًا</div>
+          </div>
+          <input id="participantsSearch" placeholder="🔍 ابحث بالاسم/الإدارة/اليوزر..." style="padding:8px 10px;border-radius:10px;border:1px solid #d9e1ee;background:#fff;color:#0b2545;font-family:inherit;min-width:260px" oninput="renderParticipantsTable()"/>
+        </div>
+        <div style="overflow-x:auto;margin-top:10px">
+          <table class="data-table" id="participantsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>الاسم</th>
+                <th>اسم المستخدم</th>
+                <th>الإدارة</th>
+                <th>الدور</th>
+                <th>التاريخ</th>
+                <th>الدرجة</th>
+                <th>المستوى</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="participantsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('dashHost').innerHTML = html;
+  renderParticipantsTable();
+
+  // charts
+  if(tot===0) return;
+  const ctxL = document.getElementById('chartLevels');
+  charts.levels && charts.levels.destroy();
+  charts.levels = new Chart(ctxL,{type:'doughnut',data:{labels:['HLP','EP','FP','DR','RM'],datasets:[{data:[counts.HLP,counts.EP,counts.FP,counts.DR,counts.RM],backgroundColor:['#16A34A','#1D4ED8','#D97706','#B91C1C','#475569']}]},options:{plugins:{legend:{position:'bottom'}}}});
+
+  const ctxM = document.getElementById('chartMastery');
+  if(ctxM){
+    charts.mastery && charts.mastery.destroy();
+    const labels = Object.keys(COMPETENCIES).map(c=>COMPETENCIES[c].ar);
+    charts.mastery = new Chart(ctxM,{
+      type:'bar',
+      data:{
+        labels,
+        datasets:[
+          {label:'Beginner', data:Object.keys(COMPETENCIES).map(c=>masteryDist[c].Beginner), backgroundColor:'#FCA5A5'},
+          {label:'Developing', data:Object.keys(COMPETENCIES).map(c=>masteryDist[c].Developing), backgroundColor:'#FCD34D'},
+          {label:'Proficient', data:Object.keys(COMPETENCIES).map(c=>masteryDist[c].Proficient), backgroundColor:'#93C5FD'},
+          {label:'Advanced', data:Object.keys(COMPETENCIES).map(c=>masteryDist[c].Advanced), backgroundColor:'#86EFAC'},
+        ]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{position:'bottom'}},
+        scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}
+      }
+    });
+  }
+
+  const ctxR = document.getElementById('chartRadar');
+  charts.radar && charts.radar.destroy();
+  charts.radar = new Chart(ctxR,{type:'radar',data:{labels:Object.values(COMPETENCIES).map(c=>c.ar),datasets:[{label:'متوسط المؤسسة',data:Object.keys(COMPETENCIES).map(c=>avgC[c]),backgroundColor:'rgba(201,162,39,.25)',borderColor:'#C9A227',borderWidth:2}]},options:{scales:{r:{min:0,max:100}}}});
+
+  const ctxRole = document.getElementById('chartRoles');
+  charts.roles && charts.roles.destroy();
+  charts.roles = new Chart(ctxRole,{type:'bar',data:{labels:Object.keys(byRole),datasets:[{label:'متوسط الدرجة',data:Object.values(byRole),backgroundColor:'#0B2545'}]},options:{indexAxis:'y',scales:{x:{min:0,max:100}}}});
+
+  const ctxDept = document.getElementById('chartDepts');
+  charts.depts && charts.depts.destroy();
+  charts.depts = new Chart(ctxDept,{type:'bar',data:{labels:Object.keys(byDept),datasets:[{label:'متوسط الدرجة',data:Object.values(byDept),backgroundColor:'#13315C'}]},options:{indexAxis:'y',scales:{x:{min:0,max:100}}}});
+}
+function tr(r){
+  const lv=LEVELS[r.level];
+  return `<tr><td>${r.name}</td><td>${r.dept}</td><td>${roleAr(r.role)}</td><td><strong>${toAr(r.overall)}</strong></td><td><span class="tag-lvl ${lv.class}">${lv.label}</span></td></tr>`;
+}
+function emptyRow(){return `<tr><td colspan="5" class="muted right">لا توجد بيانات بعد. اضغط «توليد بيانات تجريبية» لرؤية اللوحة.</td></tr>`}
+function roleAr(r){return {staff:"موظف",supervisor:"مشرف",manager:"إداري",admin:"مسؤول"}[r]||r}
+
+function _recordKey(r){ return r.id || (r.user+'__'+r.date); }
+function renderParticipantsTable(){
+  const body = document.getElementById('participantsTableBody');
+  if(!body) return;
+  const q = (document.getElementById('participantsSearch')?.value || '').trim().toLowerCase();
+  const sorted = [...state.records].sort((a,b)=> new Date(b.date) - new Date(a.date));
+  const filtered = q ? sorted.filter(r=>
+    (r.name||'').toLowerCase().includes(q) ||
+    (r.user||'').toLowerCase().includes(q) ||
+    (r.dept||'').toLowerCase().includes(q) ||
+    (LEVELS[r.level]?.label||'').toLowerCase().includes(q) ||
+    (LEVELS[r.level]?.ar||'').includes(q)
+  ) : sorted;
+
+  const meta = document.getElementById('allParticipantsMeta');
+  if(meta) meta.textContent = `${toAr(filtered.length)} من ${toAr(state.records.length)} مشاركًا`;
+
+  if(filtered.length === 0){
+    body.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#6b7a90;padding:18px">لا توجد سجلات. اضغط «توليد بيانات تجريبية» أو انتظر إكمال المشاركين.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = filtered.map((r,i)=>{
+    const lv = LEVELS[r.level] || {label:r.level,class:''};
+    const dateStr = new Date(r.date).toLocaleDateString('ar-SA');
+    const key = _recordKey(r);
+    return `
+      <tr>
+        <td>${toAr(i+1)}</td>
+        <td>${r.name||'—'}</td>
+        <td><code style="background:#eef3fb;padding:2px 6px;border-radius:6px">${r.user||'—'}</code></td>
+        <td>${r.dept||'—'}</td>
+        <td>${roleAr(r.role)}</td>
+        <td>${dateStr}</td>
+        <td><strong>${toAr(r.overall)}</strong>/١٠٠</td>
+        <td><span class="tag-lvl ${lv.class}">${lv.ar||lv.label}</span></td>
+        <td>
+          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="exportRecordPDFByKey('${key}')">📄 تحميل PDF</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+function heatColor(v){
+  if(v>=80) return "#DCFCE7";
+  if(v>=65) return "#FEF3C7";
+  if(v>=50) return "#FEE2E2";
+  return "#FECACA";
+}
+function groupAvg(records,key){
+  const g={};
+  records.forEach(r=>{const k=key==='role'?roleAr(r.role):r[key];g[k]=g[k]||[];g[k].push(r.overall)});
+  Object.keys(g).forEach(k=>g[k]=Math.round(g[k].reduce((a,b)=>a+b,0)/g[k].length));
+  return g;
+}
+function redistributionRecs(records){
+  if(records.length===0) return ["لا توجد بيانات حاليًا."];
+  const out=[];
+  const counts={};Object.keys(COMPETENCIES).forEach(c=>counts[c]=0);
+  records.forEach(r=>{const w=r.gaps?.[0]?.[0]; if(w) counts[w]++});
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  if(top && top[1]>0) out.push(`أكبر فجوة مؤسسية في «${COMPETENCIES[top[0]].full}» — يُوصى ببرنامج تطوير عرضي.`);
+  const hlp=records.filter(r=>r.level==='HLP').length;
+  if(hlp>0) out.push(`يوجد ${toAr(hlp)} مرشحين قياديين — يُقترح تشكيل مجموعة Talent Pool لإعدادهم.`);
+  const rm=records.filter(r=>r.level==='RM').length;
+  if(rm>0) out.push(`${toAr(rm)} حالات احتمال عدم مواءمة — راجع الموارد البشرية لإعادة المواءمة الوظيفية.`);
+  return out;
+}
+
+/* ============================================================
+   SAMPLE DATA (for demo of dashboard)
+============================================================ */
+function seedSampleData(){
+  const names=["أحمد العتيبي","ندى الزهراني","سعد القحطاني","ريم الدوسري","فهد المطيري","لمى الشهري","عبدالعزيز السبيعي","نورة الحربي","ماجد الغامدي","هند العنزي","تركي البلوي","شهد الرشيدي","يزيد القرني","أسماء العتيبي","بدر الصاعدي","منيرة الحازمي","خالد الأحمدي","رهف الجهني","عمر الزهراني","ليان السعيد"];
+  const depts=["التشغيل","التقنية","خدمة المستفيد","تحليل البيانات","الموارد البشرية","المالية"];
+  const roles=["staff","supervisor","manager"];
+  const recs=[];
+  for(let i=0;i<30;i++){
+    const cs={};
+    const masteries={};
+    const knowledgeStates={};
+    let ksAgg={mastered:0,unconscious:0,misinformed:0,doubt:0};
+    Object.keys(COMPETENCIES).forEach(c=>{
+      cs[c]=Math.round(40+Math.random()*55);
+      // simulate knowledge state
+      const total = 3+Math.round(Math.random()*2);
+      const mastRatio = cs[c]/100;
+      const m = Math.round(total*mastRatio*(0.6+Math.random()*0.3));
+      const remaining = total-m;
+      const mis = Math.round(remaining*Math.random()*0.4);
+      const unc = Math.round((remaining-mis)*Math.random()*0.6);
+      const dou = Math.max(0, total-m-mis-unc);
+      ksAgg.mastered+=m; ksAgg.unconscious+=unc; ksAgg.misinformed+=mis; ksAgg.doubt+=dou;
+      const t2 = m+unc+mis+dou || 1;
+      const pct = {
+        mastered:Math.round(m/t2*100), unconscious:Math.round(unc/t2*100),
+        misinformed:Math.round(mis/t2*100), doubt:Math.round(dou/t2*100)
+      };
+      const knowledgeState = Math.max(0,Math.min(100,Math.round((m*1.0 + unc*0.5 - mis*0.6 + dou*0.15)/t2*100)));
+      let lvl='Beginner';
+      if(knowledgeState>=80 && pct.misinformed<=15) lvl='Advanced';
+      else if(knowledgeState>=65 && pct.misinformed<=25) lvl='Proficient';
+      else if(knowledgeState>=40) lvl='Developing';
+      masteries[c]={level:lvl,knowledgeState,pct,total:t2};
+      knowledgeStates[c]={raw:{mastered:m,unconscious:unc,misinformed:mis,doubt:dou,levelsMastered:[]},pct,knowledgeState,total:t2};
+    });
+    const totalAns = ksAgg.mastered+ksAgg.unconscious+ksAgg.misinformed+ksAgg.doubt;
+    const ksAggPct = {
+      mastered:    Math.round(ksAgg.mastered/totalAns*100),
+      unconscious: Math.round(ksAgg.unconscious/totalAns*100),
+      misinformed: Math.round(ksAgg.misinformed/totalAns*100),
+      doubt:       Math.round(ksAgg.doubt/totalAns*100)
+    };
+    const overall=Math.max(0,Math.min(100, Math.round((Object.values(cs).reduce((a,b)=>a+b,0)/8)*(1-ksAggPct.misinformed*0.005))));
+    const advCount = Object.values(masteries).filter(m=>m.level==='Advanced').length;
+    const profPlus = Object.values(masteries).filter(m=>m.level==='Proficient'||m.level==='Advanced').length;
+    let level="DR";
+    if(overall>=80 && advCount>=3 && ksAggPct.misinformed<=15) level="HLP";
+    else if(overall>=68 && profPlus>=4 && ksAggPct.misinformed<=25) level="EP";
+    else if(overall>=55 && profPlus>=2) level="FP";
+    else if(overall>=40) level="DR";
+    else level="RM";
+    const ksByComp = Object.fromEntries(Object.entries(masteries).map(([c,m])=>[c,m.knowledgeState]));
+    const sorted=Object.entries(ksByComp).sort((a,b)=>b[1]-a[1]);
+    recs.push({
+      user:"u"+i,
+      name:names[i%names.length],
+      dept:depts[i%depts.length],
+      role:roles[i%roles.length],
+      date:new Date().toISOString(),
+      overall,compScores:cs,level,
+      maturity:50+Math.round(Math.random()*40),
+      consistencyScore:65+Math.round(Math.random()*30),
+      calibration:60+Math.round(Math.random()*35),
+      realism: ksAggPct.misinformed>=25 ? "ثقة زائفة" : "ضمن المعدّل",
+      duration:24+Math.round(Math.random()*6),
+      strengths:sorted.slice(0,3),
+      gaps:sorted.slice(-3).reverse(),
+      masteries, knowledgeStates,
+      ksAgg, ksAggPct,
+      patterns: detectPatterns(masteries, Object.fromEntries(Object.entries(knowledgeStates).map(([c,k])=>[c,k.raw]))),
+      badges: ['decision_precise','consistency'].filter(()=>Math.random()>0.5),
+      maxChallengeLevel: 1+Math.floor(Math.random()*3),
+      stagePass:{
+        core:{seen:18,total:18,passed:Math.round(18*(0.5+Math.random()*0.4)),rate:Math.round(50+Math.random()*40)},
+        challenge:{seen:3+Math.round(Math.random()*5),total:3+Math.round(Math.random()*5),passed:Math.round(Math.random()*5),rate:Math.round(40+Math.random()*50)},
+        validation:{seen:4,total:4,passed:Math.round(Math.random()*4),rate:Math.round(30+Math.random()*60)}
+      },
+      difficultyRaisedAt:[],
+      totalQuestions:25+Math.round(Math.random()*8)
+    });
+  }
+  state.records=recs;saveRecords();renderDashboard();toast("تم توليد ٣٠ سجلًا تجريبيًا");
+}
+
+/* ============================================================
+   EXPORT — Arabic-safe PDF via html2canvas + jsPDF
+============================================================ */
+function _safeFileName(s){
+  return String(s||'report').replace(/[^A-Za-z0-9._\u0600-\u06FF-]+/g,'_').slice(0,80);
+}
+
+function buildPrintableReportHTML(r){
+  const lv = LEVELS[r.level] || {label:r.level, ar:r.level, desc:''};
+  const dateStr = new Date(r.date).toLocaleString('ar-SA',{dateStyle:'medium',timeStyle:'short'});
+  const compRows = Object.keys(COMPETENCIES).map(c=>{
+    const v = r.compScores?.[c] ?? 0;
+    const m = r.masteries?.[c]?.level || '';
+    const masteryAr = {Beginner:'مبتدئ',Developing:'في تطور',Proficient:'متمكن',Advanced:'متقدم'}[m]||'—';
+    const barColor = v>=80?'#16A34A':v>=65?'#D97706':v>=50?'#C2410C':'#B91C1C';
+    return `
+      <tr>
+        <td style="padding:8px 10px;border-bottom:1px solid #E5EAF2;font-weight:600;color:#0B2545">${COMPETENCIES[c].full}</td>
+        <td style="padding:8px 10px;border-bottom:1px solid #E5EAF2;width:200px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;background:#EEF2F7;height:8px;border-radius:4px;overflow:hidden">
+              <div style="width:${v}%;height:100%;background:${barColor}"></div>
+            </div>
+            <strong style="color:#0B2545;min-width:36px;text-align:left">${v}٪</strong>
+          </div>
+        </td>
+        <td style="padding:8px 10px;border-bottom:1px solid #E5EAF2;width:100px;color:#475569">${masteryAr}</td>
+      </tr>`;
+  }).join('');
+
+  const ksTot = (r.ksAgg?.mastered||0)+(r.ksAgg?.unconscious||0)+(r.ksAgg?.misinformed||0)+(r.ksAgg?.doubt||0);
+  const ksPct = ksTot>0 ? {
+    mastered: Math.round(r.ksAgg.mastered/ksTot*100),
+    unconscious: Math.round(r.ksAgg.unconscious/ksTot*100),
+    misinformed: Math.round(r.ksAgg.misinformed/ksTot*100),
+    doubt: Math.round(r.ksAgg.doubt/ksTot*100)
+  } : {mastered:0,unconscious:0,misinformed:0,doubt:0};
+
+  // ----- Top 3 axes (strengths) — properly destructure [c, v] -----
+  const strengthsHtml = (r.strengths||[]).slice(0,3).map(pair=>{
+    const c = Array.isArray(pair) ? pair[0] : pair;
+    const v = Array.isArray(pair) ? pair[1] : 0;
+    const ar = COMPETENCIES[c]?.full || c;
+    const insight = (typeof strengthInsight === 'function') ? (strengthInsight(c)||'') : '';
+    const mLvl = r.masteries?.[c]?.level || '';
+    const masteryAr = {Beginner:'مبتدئ',Developing:'في تطور',Proficient:'متمكن',Advanced:'متقدم'}[mLvl]||'';
+    return `<li style="margin-bottom:8px;color:#14532D">
+              <div style="font-weight:700">${ar} <span style="color:#0B2545">— ${v}٪</span> <span style="background:#BBF7D0;color:#14532D;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-right:4px">${masteryAr}</span></div>
+              ${insight?`<div style="font-size:11.5px;color:#15803D;margin-top:2px">${insight}</div>`:''}
+            </li>`;
+  }).join('') || '<li style="color:#6b7a90">—</li>';
+
+  // ----- Top 3 gaps — properly destructure [c, v] -----
+  const gapsHtml = (r.gaps||[]).slice(0,3).map(pair=>{
+    const c = Array.isArray(pair) ? pair[0] : pair;
+    const v = Array.isArray(pair) ? pair[1] : 0;
+    const ar = COMPETENCIES[c]?.full || c;
+    const insight = (typeof gapInsight === 'function') ? (gapInsight(c)||'') : '';
+    const mLvl = r.masteries?.[c]?.level || '';
+    const masteryAr = {Beginner:'مبتدئ',Developing:'في تطور',Proficient:'متمكن',Advanced:'متقدم'}[mLvl]||'';
+    return `<li style="margin-bottom:8px;color:#7F1D1D">
+              <div style="font-weight:700">${ar} <span style="color:#0B2545">— ${v}٪</span> <span style="background:#FECACA;color:#7F1D1D;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-right:4px">${masteryAr}</span></div>
+              ${insight?`<div style="font-size:11.5px;color:#B91C1C;margin-top:2px">يحتاج تركيزاً على: ${insight}</div>`:''}
+            </li>`;
+  }).join('') || '<li style="color:#6b7a90">—</li>';
+
+  // ----- Discovered patterns -----
+  const patternColors = {
+    overconfidence: {bg:'#FEE2E2', fg:'#7F1D1D', label:'ثقة زائفة'},
+    underconfidence:{bg:'#FEF3C7', fg:'#78350F', label:'نقص ثقة'},
+    true_mastery:   {bg:'#DCFCE7', fg:'#14532D', label:'إتقان حقيقي'},
+    learning_zone:  {bg:'#DBEAFE', fg:'#1E3A8A', label:'طور تعلم'}
+  };
+  const patternsHtml = (r.patterns||[]).length ? (r.patterns||[]).map(p=>{
+    const pc = patternColors[p.type] || {bg:'#EEF2F7', fg:'#0B2545', label:p.type};
+    return `<div style="background:${pc.bg};border-radius:8px;padding:10px 12px;margin-bottom:8px;border-right:4px solid ${pc.fg}">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <span style="background:${pc.fg};color:#fff;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700">${pc.label}</span>
+              </div>
+              <div style="font-size:12px;color:#1F2937;line-height:1.8">${p.text||''}</div>
+            </div>`;
+  }).join('') : '<div style="font-size:12px;color:#6b7a90">لم تُكتشف أنماط بارزة تستدعي التنبيه.</div>';
+
+  // ----- Recommendation + Development Plan -----
+  const recText = (typeof recommendation === 'function') ? recommendation(r) : '';
+  const plan = (typeof developmentPlan === 'function') ? developmentPlan(r) : {d30:[],d60:[],d90:[]};
+  const planCol = (title, items, accent) => `
+    <div style="background:#F7F9FC;border:1px solid #E5EAF2;border-radius:10px;padding:12px">
+      <div style="font-weight:800;color:${accent};font-size:13px;margin-bottom:6px;border-bottom:2px solid ${accent};padding-bottom:4px">${title}</div>
+      <ul style="margin:0;padding-right:16px;font-size:11.5px;color:#1F2937;line-height:1.8">
+        ${(items||[]).map(x=>`<li style="margin-bottom:4px">${x}</li>`).join('') || '<li style="color:#6b7a90">—</li>'}
+      </ul>
+    </div>`;
+
+  // ----- Badges (use .name not .label) -----
+  const badgesHtml = (r.badges||[]).length ? (r.badges||[]).map(b=>{
+    const def = (typeof BADGES_DEF!=='undefined' && BADGES_DEF[b]) ? BADGES_DEF[b] : null;
+    const lbl = def?.name || b;
+    const ico = def?.icon || '★';
+    return `<span style="display:inline-block;padding:6px 12px;background:#FEF3C7;color:#78350F;border-radius:999px;font-size:12px;font-weight:700;margin:0 4px 6px 0;border:1px solid #FCD34D">${ico} ${lbl}</span>`;
+  }).join('') : '<span style="color:#6b7a90">لا توجد شارات</span>';
+
+  return `
+    <div id="printableReport" style="
+      direction:rtl;
+      font-family:'Tajawal','Cairo','Segoe UI',Arial,sans-serif;
+      background:#fff;
+      color:#0B2545;
+      width:794px;
+      padding:36px 40px;
+      box-sizing:border-box;
+      line-height:1.6;
+    ">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #C9A227;padding-bottom:14px;margin-bottom:18px">
+        <div>
+          <div style="font-size:22px;font-weight:800;color:#0B2545">تقرير الجاهزية القيادية</div>
+          <div style="font-size:13px;color:#475569;margin-top:4px">منصة قياس الجاهزية القيادية والكفاءات المستقبلية</div>
+        </div>
+        <div style="text-align:left;font-size:12px;color:#475569">
+          <div>تاريخ التقرير: ${dateStr}</div>
+          <div>مدة التقييم: ${r.duration||'—'} دقيقة</div>
+          <div>عدد الأسئلة: ${r.totalQuestions||'—'}</div>
+        </div>
+      </div>
+
+      <!-- Identity -->
+      <div style="background:#F7F9FC;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13.5px">
+        <div><strong style="color:#0B2545">الاسم:</strong> ${r.name||'—'}</div>
+        <div><strong style="color:#0B2545">اسم المستخدم:</strong> ${r.user||'—'}</div>
+        <div><strong style="color:#0B2545">الإدارة:</strong> ${r.dept||'—'}</div>
+        <div><strong style="color:#0B2545">المستوى الوظيفي:</strong> ${roleAr(r.role)}</div>
+      </div>
+
+      <!-- Overall band -->
+      <div style="display:grid;grid-template-columns:200px 1fr;gap:14px;margin-bottom:18px">
+        <div style="background:linear-gradient(135deg,#0B2545,#13315C);color:#fff;border-radius:12px;padding:18px;text-align:center">
+          <div style="font-size:11px;color:#C9A227;font-weight:700">الدرجة الإجمالية</div>
+          <div style="font-size:42px;font-weight:800;line-height:1;margin:8px 0">${r.overall}<span style="font-size:18px;color:#9fb1cd">/100</span></div>
+          <div style="font-size:11px;color:#cfd8e3">نضج: ${r.maturity||'—'}٪ • ثبات: ${r.consistencyScore||'—'}٪</div>
+        </div>
+        <div style="border:1px solid #E5EAF2;border-radius:12px;padding:16px">
+          <div style="font-size:11px;color:#C9A227;font-weight:700">التصنيف النهائي</div>
+          <div style="font-size:20px;font-weight:800;color:#0B2545;margin:4px 0">${lv.ar||lv.label}</div>
+          <div style="font-size:12.5px;color:#475569;line-height:1.7">${lv.desc||''}</div>
+        </div>
+      </div>
+
+      <!-- Competency Table -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:#0B2545;margin-bottom:8px;border-right:4px solid #C9A227;padding-right:10px">تفصيل الكفاءات الثمانية</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <thead>
+            <tr style="background:#F3F6FB">
+              <th style="padding:8px 10px;text-align:right;color:#0B2545;font-weight:700">الكفاءة</th>
+              <th style="padding:8px 10px;text-align:right;color:#0B2545;font-weight:700">الدرجة</th>
+              <th style="padding:8px 10px;text-align:right;color:#0B2545;font-weight:700">مستوى الإتقان</th>
+            </tr>
+          </thead>
+          <tbody>${compRows}</tbody>
+        </table>
+      </div>
+
+      <!-- Top 3 Strengths / Top 3 Gaps -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px">
+          <div style="font-weight:800;color:#14532D;margin-bottom:10px;font-size:14px;border-bottom:2px solid #BBF7D0;padding-bottom:6px">أعلى ٣ محاور قوة</div>
+          <ol style="margin:0;padding-right:20px;font-size:12.5px">${strengthsHtml}</ol>
+        </div>
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:14px">
+          <div style="font-weight:800;color:#7F1D1D;margin-bottom:10px;font-size:14px;border-bottom:2px solid #FECACA;padding-bottom:6px">أهم ٣ فجوات تطويرية</div>
+          <ol style="margin:0;padding-right:20px;font-size:12.5px">${gapsHtml}</ol>
+        </div>
+      </div>
+
+      <!-- Knowledge State -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:#0B2545;margin-bottom:8px;border-right:4px solid #C9A227;padding-right:10px">حالة المعرفة (الثقة × الصحة)</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="background:#DCFCE7;border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;color:#14532D">إتقان حقيقي</div><div style="font-size:18px;font-weight:800;color:#14532D">${ksPct.mastered}٪</div></div>
+          <div style="background:#DBEAFE;border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;color:#1E3A8A">كفاءة غير واعية</div><div style="font-size:18px;font-weight:800;color:#1E3A8A">${ksPct.unconscious}٪</div></div>
+          <div style="background:#FEE2E2;border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;color:#7F1D1D">ثقة زائفة</div><div style="font-size:18px;font-weight:800;color:#7F1D1D">${ksPct.misinformed}٪</div></div>
+          <div style="background:#FEF3C7;border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;color:#78350F">طور التعلم</div><div style="font-size:18px;font-weight:800;color:#78350F">${ksPct.doubt}٪</div></div>
+        </div>
+        <div style="font-size:11.5px;color:#6b7a90;margin-top:6px">معايرة الثقة: ${r.calibration||'—'}٪ — كلما ارتفعت كان الحكم الذاتي أدق.</div>
+      </div>
+
+      <!-- Discovered Patterns -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:#0B2545;margin-bottom:8px;border-right:4px solid #C9A227;padding-right:10px">الأنماط المكتشفة</div>
+        <div style="font-size:11.5px;color:#6b7a90;margin-bottom:8px">تحليل عابر للأسئلة على مستوى المحور — وليس على إجابة منفردة.</div>
+        ${patternsHtml}
+      </div>
+
+      <!-- Recommendation -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:#0B2545;margin-bottom:8px;border-right:4px solid #C9A227;padding-right:10px">التوصية</div>
+        <div style="background:#0B2545;color:#fff;border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.9">
+          ${recText || 'لا توجد توصية متاحة.'}
+        </div>
+      </div>
+
+      <!-- Leadership Path: 30 / 60 / 90 days -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:#0B2545;margin-bottom:8px;border-right:4px solid #C9A227;padding-right:10px">المسار القيادي المقترح (٩٠ يوماً)</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          ${planCol('أول ٣٠ يوماً', plan.d30, '#0B2545')}
+          ${planCol('اليوم ٣١ – ٦٠', plan.d60, '#C9A227')}
+          ${planCol('اليوم ٦١ – ٩٠', plan.d90, '#16A34A')}
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;color:#0B2545;margin-bottom:8px;border-right:4px solid #C9A227;padding-right:10px">الشارات المكتسبة</div>
+        <div>${badgesHtml}</div>
+      </div>
+
+      <!-- Footer -->
+      <div style="border-top:1px solid #E5EAF2;margin-top:18px;padding-top:10px;font-size:10.5px;color:#6b7a90;text-align:center">
+        وثيقة سرية لأغراض التطوير والتخطيط الوظيفي • تُعالج وفق سياسات الموارد البشرية
+      </div>
+    </div>
+  `;
+}
+
+async function exportRecordPDF(record){
+  if(!record){ toast('لا يوجد تقرير للتصدير'); return; }
+  if(typeof html2canvas === 'undefined'){
+    alert('تعذّر تحميل مكتبة التصدير. تأكد من الاتصال بالإنترنت ثم أعد المحاولة.');
+    return;
+  }
+  // Build off-screen container
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:-99999px;top:0;z-index:-1;background:#fff';
+  wrap.innerHTML = buildPrintableReportHTML(record);
+  document.body.appendChild(wrap);
+  const node = wrap.querySelector('#printableReport');
+
+  try{
+    toast('جارٍ إنشاء ملف PDF...');
+    // Give fonts a moment
+    if(document.fonts && document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+    const canvas = await html2canvas(node, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false,
+      windowWidth: node.scrollWidth,
+      windowHeight: node.scrollHeight
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF({orientation:'p', unit:'pt', format:'a4'});
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 24;
+    const imgW = pageW - margin*2;
+    const imgH = (canvas.height * imgW) / canvas.width;
+
+    if(imgH <= pageH - margin*2){
+      pdf.addImage(imgData, 'PNG', margin, margin, imgW, imgH, undefined, 'FAST');
+    } else {
+      // Multi-page: slice the canvas vertically
+      const pageContentH = pageH - margin*2;
+      const sliceH = (canvas.width / imgW) * pageContentH; // canvas px per page
+      let renderedH = 0;
+      let pageIdx = 0;
+      while(renderedH < canvas.height){
+        const sh = Math.min(sliceH, canvas.height - renderedH);
+        const tmp = document.createElement('canvas');
+        tmp.width = canvas.width; tmp.height = sh;
+        tmp.getContext('2d').drawImage(canvas, 0, renderedH, canvas.width, sh, 0, 0, canvas.width, sh);
+        const slice = tmp.toDataURL('image/png');
+        const sliceImgH = (sh * imgW) / canvas.width;
+        if(pageIdx>0) pdf.addPage();
+        pdf.addImage(slice, 'PNG', margin, margin, imgW, sliceImgH, undefined, 'FAST');
+        renderedH += sh;
+        pageIdx++;
+      }
+    }
+    const fname = `leadership_report_${_safeFileName(record.user||record.name||'user')}_${(record.date||'').slice(0,10)}.pdf`;
+    pdf.save(fname);
+    toast('تم تصدير التقرير PDF');
+  } catch(err){
+    console.error(err);
+    alert('حدث خطأ أثناء إنشاء PDF: ' + (err.message||err));
+  } finally {
+    document.body.removeChild(wrap);
+  }
+}
+
+function exportPDF(){
+  const last = state.records[state.records.length-1];
+  return exportRecordPDF(last);
+}
+
+/* Helper used by dashboard buttons */
+function exportRecordPDFByKey(key){
+  const r = state.records.find(x => (x.id||(x.user+'__'+x.date)) === key);
+  if(!r){ toast('لم يتم العثور على السجل'); return; }
+  exportRecordPDF(r);
+}
+function exportMyExcel(){
+  const last=state.records[state.records.length-1];
+  if(!last){alert('لا يوجد تقرير');return}
+  const wb=XLSX.utils.book_new();
+  const summary=[
+    ["الاسم",last.name],["الإدارة",last.dept],["الدور",roleAr(last.role)],
+    ["الدرجة الإجمالية",last.overall],["المستوى",LEVELS[last.level].label],
+    ["نضج",last.maturity],["ثبات",last.consistencyScore],["المدة (دقائق)",last.duration]
+  ];
+  const compRows=[["الكفاءة","الدرجة"]].concat(Object.keys(COMPETENCIES).map(c=>[COMPETENCIES[c].full,last.compScores[c]]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(summary),"الملخص");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(compRows),"الكفاءات");
+  XLSX.writeFile(wb,`my_assessment_${last.user}.xlsx`);
+  toast("تم تصدير النتيجة Excel");
+}
+function exportDashboardExcel(){
+  if(state.records.length===0){alert("لا توجد بيانات");return}
+  const rows=[["الاسم","الإدارة","الدور","الدرجة","المستوى","C1","C2","C3","C4","C5","C6","C7","C8","التاريخ"]];
+  state.records.forEach(r=>{
+    rows.push([r.name,r.dept,roleAr(r.role),r.overall,LEVELS[r.level].label,
+      r.compScores.C1,r.compScores.C2,r.compScores.C3,r.compScores.C4,r.compScores.C5,r.compScores.C6,r.compScores.C7,r.compScores.C8,
+      new Date(r.date).toLocaleString('ar-SA')]);
+  });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),"كل المشاركين");
+  XLSX.writeFile(wb,`dashboard_export.xlsx`);
+  toast("تم تصدير لوحة الإدارة Excel");
+}
+
+/* ============================================================
+   UTIL
+============================================================ */
+function toAr(n){
+  // keep numerals as is for clarity; some users prefer Hindi-Arabic numerals
+  return String(n);
+}
+</script>
+</body>
+</html>
